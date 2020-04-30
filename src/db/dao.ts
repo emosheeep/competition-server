@@ -25,13 +25,14 @@ const connect = () => new Promise<Mongoose>((resolve, reject) => {
  * 插入数据
  * @param name   集合名
  * @param data   插入的数据
+ * @param inTransaction   是否配合事务使用
  */
-export const insert = function (name: string, data: object, options: object) {
+export const insert = function (name: string, data: [] | {}, options = {}, inTransaction = false) {
 	const model = getDocument(name)
 	return new Promise<any>(async (resolve, reject) => {
 		try {
-			await connect()
-			const _ = await model.collection.insertOne(data, options)
+			if (!inTransaction) await connect()
+			const _ = await model.insertMany(data, options)
 			resolve(_)
 		} catch (e) {
 			consola.error(`[Mongo Insert Error] ${e.message}`)
@@ -45,13 +46,20 @@ export const insert = function (name: string, data: object, options: object) {
  * @param name 数据库
  * @param condition  条件
  * @param data   数据
+ * @param inTransaction   是否配合事务使用
  */
-export const upsert = function (name: string, condition: object, data: object) {
+export const update = function (
+	name: string,
+	condition: {},
+	data = {},
+	options = {},
+	inTransaction = false
+) {
 	const model = getDocument(name)
 	return new Promise<any>(async (resolve, reject) => {
 		try {
-			await connect()
-			const _ = await model.updateOne(condition, data, { upsert: true })
+			if (!inTransaction) await connect()
+			const _ = await model.updateOne(condition, data, options)
 			resolve(_)
 		} catch (e) {
 			consola.error(`[Mongo Update Error] ${e.message}`)
@@ -84,13 +92,14 @@ export const find = function(name: string, condition = {}){
  * @param dbname 数据库
  * @param table  集合名
  * @param condition   条件
+ * @param inTransaction   是否配合事务使用
  */
-export const remove = function(name: string, condition = {}, options = {}) {
+export const remove = function(name: string, condition = {}, options = {}, inTransaction = false) {
 	const model = getDocument(name)
 	return new Promise<any>(async (resolve, reject) => {
 		try {
-			await connect()
-			const _ = await model.deleteOne(condition, options)
+			if (!inTransaction) await connect()
+			const _ = await model.deleteMany(condition, options)
 			resolve(_)
 		} catch (e) {
 			consola.error(`[Mongo Detele Error] ${e.message}`)
@@ -103,7 +112,7 @@ export const remove = function(name: string, condition = {}, options = {}) {
  * 事务操作
  * @param executor 传入session用于事务的函数，返回Promise
  */
-export const transaction = function (executor: (session: ClientSession) => Promise<any>) {
+export function transaction (executor: (session: ClientSession) => Promise<any>) {
 	return new Promise<any[]>(async (resolve, reject) => {
 		const client = await connect()
 		const session = await client.startSession() // 启动会话

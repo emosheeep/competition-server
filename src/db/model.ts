@@ -12,6 +12,15 @@ export const STUDENT = 'student'
 export const TEACHER = 'teacher'
 export const RACE = 'race'
 export const RECORD = 'record'
+export interface UserData {
+  account: string;
+  password?: string;
+  name?: string;
+  sex?: string;
+  grade?: string;
+  classname?: string;
+  dept?: string;
+}
 
 const Schemas: ObjectWithStringKeys = {}
 
@@ -28,7 +37,7 @@ Schemas[USER] = new Schema({
  * 管理员信息
  */
 Schemas[ADMIN] = new Schema({
-	aid: { type: String, required: true, trim: true },
+	account: { type: String, required: true, trim: true },
 	password: { type: String, required: true, trim: true }
 })
 
@@ -36,8 +45,9 @@ Schemas[ADMIN] = new Schema({
  * 学生信息
  */
 Schemas[STUDENT] = new Schema({
-	sid: { type: String, required: true, trim: true },
-	sname: { type: String, required: true, trim: true },
+	account: { type: String, required: true, trim: true },
+	password: { type: String, required: true, trim: true },
+	name: { type: String, required: true, trim: true },
 	sex: { type: String, required: true, trim: true },
 	grade: { type: String, required: true, trim: true },
 	classname: { type: String, required: true, trim: true }
@@ -47,8 +57,9 @@ Schemas[STUDENT] = new Schema({
  * 教师信息
  */
 Schemas[TEACHER] = new Schema({
-	tid: { type: String, required: true, trim: true },
-	tname: { type: String, required: true, trim: true },
+	account: { type: String, required: true, trim: true },
+	password: { type: String, required: true, trim: true },
+	name: { type: String, required: true, trim: true },
 	dept: { type: String, required: true, trim: true }
 })
 
