@@ -67,21 +67,20 @@ Schemas[TEACHER] = new Schema({
  * 赛事信息
  */
 Schemas[RACE] = new Schema({
-	rid: { type: String, required: true, trim: true },
 	title: { type: String, required: true, trim: true },
 	sponsor: { type: String, required: true, trim: true },
 	year: { type: String, required: true, trim: true },
 	level: { type: String, required: true, trim: true },
 	location: { type: String, required: true, trim: true },
 	date: { type: Number, required: true, trim: true },
-	description: { type: String, required: true, trim: true }
+	description: { type: String, trim: true }
 })
 
 /**
  * 参赛记录信息
  */
 Schemas[RECORD] = new Schema({
-	rid: { type: String, required: true, trim: true },
+	id: { type: String, required: true, trim: true },
 	account: { type: String, required: true, trim: true },
 	teacher: { type: String, required: true, trim: true },
 	score: { type: String, trim: true },

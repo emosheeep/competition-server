@@ -27,7 +27,11 @@ const connect = () => new Promise<Mongoose>((resolve, reject) => {
  * @param data   插入的数据
  * @param inTransaction   是否配合事务使用
  */
-export const insert = function (name: string, data: [] | {}, options = {}, inTransaction = false) {
+export const insert = function (
+	name: string, data: [] | {},
+	options = {},
+	inTransaction = false
+) {
 	const model = getDocument(name)
 	return new Promise<any>(async (resolve, reject) => {
 		try {
@@ -94,7 +98,12 @@ export const find = function(name: string, condition = {}){
  * @param condition   条件
  * @param inTransaction   是否配合事务使用
  */
-export const remove = function(name: string, condition = {}, options = {}, inTransaction = false) {
+export const remove = function(
+	name: string,
+	condition = {},
+	options = {},
+	inTransaction = false
+) {
 	const model = getDocument(name)
 	return new Promise<any>(async (resolve, reject) => {
 		try {
@@ -112,7 +121,9 @@ export const remove = function(name: string, condition = {}, options = {}, inTra
  * 事务操作
  * @param executor 传入session用于事务的函数，返回Promise
  */
-export function transaction (executor: (session: ClientSession) => Promise<any>) {
+export function transaction (
+	executor: (session: ClientSession) => Promise<any>
+) {
 	return new Promise<any[]>(async (resolve, reject) => {
 		const client = await connect()
 		const session = await client.startSession() // 启动会话

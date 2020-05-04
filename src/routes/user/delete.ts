@@ -5,7 +5,6 @@ import { transaction, remove } from '../../db/dao'
 const router = Router()
 export default router.delete('/delete', (req: Request, res: Response) => {
   const { type, account } = req.body
-  console.log(type, account)
   transaction(session => Promise.all([
     remove(USER, { account, identity: type }, { session }, true),
     remove(type, { account }, { session }, true)
