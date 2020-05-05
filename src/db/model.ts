@@ -60,7 +60,8 @@ Schemas[TEACHER] = new Schema({
 	account: { type: String, required: true, trim: true },
 	password: { type: String, required: true, trim: true },
 	name: { type: String, required: true, trim: true },
-	dept: { type: String, required: true, trim: true }
+	dept: { type: String, required: true, trim: true },
+	description: { type: String, trim: true }
 })
 
 /**
@@ -81,8 +82,12 @@ Schemas[RACE] = new Schema({
  */
 Schemas[RECORD] = new Schema({
 	id: { type: String, required: true, trim: true },
-	account: { type: String, required: true, trim: true },
-	teacher: { type: String, required: true, trim: true },
+	title: { type: String, required: true, trim: true },
+	date: { type: Number, required: true, trim: true },
+	sid: { type: String, required: true, trim: true },
+	sname: { type: String, required: true, trim: true },
+	tid: { type: String, required: true, trim: true },
+	tname: { type: String, required: true, trim: true },
 	score: { type: String, trim: true },
 })
 
