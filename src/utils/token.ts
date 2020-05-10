@@ -1,4 +1,4 @@
-import jwt, {} from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import consola from 'consola'
 
 const secret = 'competitoin-system' // 加密密钥
@@ -12,7 +12,7 @@ export function sign (content: string | {}) {
 export function verify (token: string) {
   try{
     return jwt.verify(token, secret)
-  }catch(e){
+  } catch (e) {
     consola.error(e.message)
     return null
   }
