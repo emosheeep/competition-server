@@ -1,6 +1,3 @@
-/**
- * 返回所有用户的信息
- */
 import { Request, Response, Router } from 'express'
 import { find } from '../../db/dao'
 import { ADMIN, STUDENT, TEACHER } from '../../db/model'
@@ -14,7 +11,10 @@ export default router.get('/list', async (req: Request, res: Response) => {
         find(ADMIN), find(STUDENT), find(TEACHER)
       ])
       res.json({ admins, students, teachers })
-    } else if (typeof type === 'string' && [ADMIN, STUDENT, TEACHER].includes(type)) {
+    } else if (
+      typeof type === 'string'
+      && [ADMIN, STUDENT, TEACHER].includes(type)
+    ) {
       const results = await find(type)
       res.status(200).json(results)
     } else {

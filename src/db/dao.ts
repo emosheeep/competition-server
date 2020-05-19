@@ -28,7 +28,8 @@ const connect = () => new Promise<Mongoose>((resolve, reject) => {
  * @param inTransaction   是否配合事务使用
  */
 export const insert = function (
-	name: string, data: [] | {},
+	name: string,
+	data: [] | {},
 	options = {},
 	inTransaction = false
 ) {
