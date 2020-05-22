@@ -89,6 +89,8 @@ Schemas[RECORD] = new Schema({
 	tid: { type: String, required: true, trim: true },
 	tname: { type: String, required: true, trim: true },
 	score: { type: String, trim: true },
+	uploaded: { type: Boolean, default: false },
+	reviewed: { type: Boolean, default: false }
 })
 
 export default (name: string) => model(name, Schemas[name])

@@ -1,9 +1,9 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
 import { insert, find } from '../../db/dao'
 import { RECORD } from '../../db/model'
 
 const router = Router()
-export default router.post('/add', async (req: Request, res: Response) => {
+export default router.post('/add', async (req, res) => {
   const data = req.body
   if (!data) {
     return res.status(400).end()
