@@ -32,21 +32,17 @@ export const getFileUrl = function (filename: string): string {
 
 /**
  * cdn 文件刷新
- * @param names 要刷新的文件名
+ * @param name 要刷新的文件名
  */
-export const refreshUrl = function (names: string[] | string): Promise<unknown> {
-  const urls: string[] = []
-  if (Array.isArray(names)) { // 构造出url数组
-    for (const name of names) {
-      urls.push(`${domain}/${name}`)
-    }
-  } else {
-    urls.push(`${domain}/${names}`)
-  }
+export const refreshUrl = function (name: string): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    cdnManager.refreshUrls(urls, function (err, body) {
+    cdnManager.refreshUrls([`${domain}/${name}`], function (err, body) {
       if (err) {
         return reject(err)
+      }
+
+      if (body.code !== 200) {
+        reject(body.error)
       } else {
         resolve(body)
       }
@@ -55,13 +51,17 @@ export const refreshUrl = function (names: string[] | string): Promise<unknown> 
 }
 
 interface FileInfo {
-  fsize: number
+  fsize: number;
   hash: string;
   md5: string;
   mimeType: string;
   putTime: number;
-  type: number
+  type: number;
 }
+/**
+ * 获取文件信息
+ * @param name 文件名
+ */
 export const getFileInfo = function (name: string): Promise<FileInfo> {
   return new Promise<FileInfo>((resolve, reject) => {
     bucketManager.stat(bucket, name, function (err, body) {
