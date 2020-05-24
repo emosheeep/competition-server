@@ -16,7 +16,7 @@ router.post('/login', (req: RequestWithBody, res) => {
   if (!account || !password || !identity) {
     return res.status(400).end()
   }
-  find(USER, { 
+  find(USER, {
     account,
     password,
     identity
@@ -26,7 +26,6 @@ router.post('/login', (req: RequestWithBody, res) => {
         code: 1,
         msg: '用户不存在或密码错误'
       })
-      return
     } else {
       return find(identity, { account }) // 信息表
     }
@@ -46,7 +45,7 @@ router.post('/login', (req: RequestWithBody, res) => {
         token: sign({ account, identity })
       }
     })
-  }).catch(_ => {
+  }).catch(() => {
     res.status(500).end()
   })
 })

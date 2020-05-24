@@ -13,12 +13,12 @@ const { url, options } = config
 
 // 连接mongoDB
 const connect = () => new Promise<Mongoose>((resolve, reject) => {
-	mongoose.connect(url, options).then(client => {
-		resolve(client)
-	}).catch(e => {
-		consola.error(`[Mongo Connect Error] ${e.message}`)
-		reject(e)
-	})
+  mongoose.connect(url, options).then(client => {
+    resolve(client)
+  }).catch(e => {
+    consola.error(`[Mongo Connect Error] ${e.message}`)
+    reject(e)
+  })
 })
 
 /**
@@ -28,22 +28,22 @@ const connect = () => new Promise<Mongoose>((resolve, reject) => {
  * @param inTransaction   是否配合事务使用
  */
 export const insert = function (
-	name: string,
-	data: [] | {},
-	options = {},
-	inTransaction = false
+  name: string,
+  data: [] | {},
+  options = {},
+  inTransaction = false
 ) {
-	const model = getDocument(name)
-	return new Promise<any>(async (resolve, reject) => {
-		try {
-			if (!inTransaction) await connect()
-			const _ = await model.insertMany(data, options)
-			resolve(_)
-		} catch (e) {
-			consola.error(`[Mongo Insert Error] ${e.message}`)
-			reject(e)
-		}
-	})
+  const model = getDocument(name)
+  return new Promise<any>(async (resolve, reject) => {
+    try {
+      if (!inTransaction) await connect()
+      const _ = await model.insertMany(data, options)
+      resolve(_)
+    } catch (e) {
+      consola.error(`[Mongo Insert Error] ${e.message}`)
+      reject(e)
+    }
+  })
 }
 
 /**
@@ -54,23 +54,23 @@ export const insert = function (
  * @param inTransaction   是否配合事务使用
  */
 export const update = function (
-	name: string,
-	condition: {},
-	data = {},
-	options = {},
-	inTransaction = false
+  name: string,
+  condition: {},
+  data = {},
+  options = {},
+  inTransaction = false
 ) {
-	const model = getDocument(name)
-	return new Promise<any>(async (resolve, reject) => {
-		try {
-			if (!inTransaction) await connect()
-			const _ = await model.updateOne(condition, data, options)
-			resolve(_)
-		} catch (e) {
-			consola.error(`[Mongo Update Error] ${e.message}`)
-			reject(e)
-		}
-	})
+  const model = getDocument(name)
+  return new Promise<any>(async (resolve, reject) => {
+    try {
+      if (!inTransaction) await connect()
+      const _ = await model.updateOne(condition, data, options)
+      resolve(_)
+    } catch (e) {
+      consola.error(`[Mongo Update Error] ${e.message}`)
+      reject(e)
+    }
+  })
 }
 
 /**
@@ -78,18 +78,18 @@ export const update = function (
  * @param name        集合名
  * @param condition   条件
  */
-export const find = function(name: string, condition = {}){
-	const model = getDocument(name)
-	return new Promise<Document[]>(async (resolve, reject) => {
-		try {
-			await connect()
-			const values = await model.find(condition)
-			resolve(values)
-		} catch (e) {
-			consola.error(`[Mongo Find Error] ${e.message}`)
-			reject(e)
-		}
-	})
+export const find = function (name: string, condition = {}) {
+  const model = getDocument(name)
+  return new Promise<Document[]>(async (resolve, reject) => {
+    try {
+      await connect()
+      const values = await model.find(condition)
+      resolve(values)
+    } catch (e) {
+      consola.error(`[Mongo Find Error] ${e.message}`)
+      reject(e)
+    }
+  })
 }
 
 /**
@@ -99,23 +99,23 @@ export const find = function(name: string, condition = {}){
  * @param condition   条件
  * @param inTransaction   是否配合事务使用
  */
-export const remove = function(
-	name: string,
-	condition = {},
-	options = {},
-	inTransaction = false
+export const remove = function (
+  name: string,
+  condition = {},
+  options = {},
+  inTransaction = false
 ) {
-	const model = getDocument(name)
-	return new Promise<any>(async (resolve, reject) => {
-		try {
-			if (!inTransaction) await connect()
-			const _ = await model.deleteMany(condition, options)
-			resolve(_)
-		} catch (e) {
-			consola.error(`[Mongo Detele Error] ${e.message}`)
-			reject(e)
-		}
-	})
+  const model = getDocument(name)
+  return new Promise<any>(async (resolve, reject) => {
+    try {
+      if (!inTransaction) await connect()
+      const _ = await model.deleteMany(condition, options)
+      resolve(_)
+    } catch (e) {
+      consola.error(`[Mongo Detele Error] ${e.message}`)
+      reject(e)
+    }
+  })
 }
 
 /**
@@ -123,22 +123,22 @@ export const remove = function(
  * @param executor 传入session用于事务的函数，返回Promise
  */
 export function transaction (
-	executor: (session: ClientSession) => Promise<any>
+  executor: (session: ClientSession) => Promise<any>
 ) {
-	return new Promise<any[]>(async (resolve, reject) => {
-		const client = await connect()
-		const session = await client.startSession() // 启动会话
-		try {
-			session.startTransaction() // 开启事务
-			const result = await executor(session)
-			await session.commitTransaction() // 提交事务
-			resolve(result)
-		} catch (e) {
-			reject(e)
-			consola.error(`[Mongo Transaction Error] ${e.message}`)
-			await session.abortTransaction() // 回滚事务
-		} finally {
-			session.endSession() // 结束会话
-		}
-	})
+  return new Promise<any[]>(async (resolve, reject) => {
+    const client = await connect()
+    const session = await client.startSession() // 启动会话
+    try {
+      session.startTransaction() // 开启事务
+      const result = await executor(session)
+      await session.commitTransaction() // 提交事务
+      resolve(result)
+    } catch (e) {
+      reject(e)
+      consola.error(`[Mongo Transaction Error] ${e.message}`)
+      await session.abortTransaction() // 回滚事务
+    } finally {
+      session.endSession() // 结束会话
+    }
+  })
 }

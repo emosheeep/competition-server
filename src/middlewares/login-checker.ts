@@ -15,9 +15,9 @@ export default function (req: Request, res: Response, next: NextFunction) {
   if (req.path.endsWith('/login')) {
     return next()
   } else if (
-    !tokenObj || !user
-    || user.account !== tokenObj.account
-    || user.identity !== tokenObj.identity
+    !tokenObj || !user ||
+    user.account !== tokenObj.account ||
+    user.identity !== tokenObj.identity
   ) {
     res.status(401).end()
   } else {

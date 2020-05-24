@@ -8,9 +8,9 @@ export default router.delete('/delete', (req: Request, res: Response) => {
   if (!id) {
     return res.status(400).end()
   }
-  remove(RECORD, { id }).then(_ => {
+  remove(RECORD, { id }).then(() => {
     res.status(200).end()
-  }).catch(e => {
+  }).catch(() => {
     res.status(500).end()
   })
 })

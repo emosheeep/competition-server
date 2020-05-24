@@ -3,15 +3,18 @@ import { update } from '../../db/dao'
 import { RACE } from '../../db/model'
 
 const router = Router()
-export default router.put('/update', (req: Request, res: Response) => {
+
+router.put('/update', (req: Request, res: Response) => {
   const data = req.body
   const { _id } = data
   if (!_id) {
     return res.status(400).end()
   }
-  update(RACE, { _id }, data).then(_ => {
+  update(RACE, { _id }, data).then(() => {
     res.status(200).end()
-  }).catch(e => {
+  }).catch(() => {
     res.status(500).end()
   })
 })
+
+export default router

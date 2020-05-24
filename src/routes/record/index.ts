@@ -3,7 +3,7 @@ import List from './list'
 import Add from './add'
 import Update from './update'
 import Delete from './delete'
-import Auth from './upload'
+import File from './file'
 
 const router = Router()
 
@@ -11,6 +11,6 @@ router.use(Add)
 router.use(List)
 router.use(Update)
 router.use(Delete)
-router.use(Auth)
+router.use(File)
 
 export default router

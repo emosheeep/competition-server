@@ -7,7 +7,7 @@ export default router.get('/list', (req: Request, res: Response) => {
   const { query } = req
   find(RECORD, query).then(results => {
     res.json(results)
-  }).catch(_ => {
+  }).catch(() => {
     res.status(500).end()
   })
-}) 
+})

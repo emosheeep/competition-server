@@ -5,9 +5,9 @@ import { RECORD } from '../../db/model'
 const router = Router()
 export default router.put('/update', (req: Request, res: Response) => {
   const data = req.body
-  update(RECORD, { _id: data._id }, data).then(_ => {
+  update(RECORD, { _id: data._id }, data).then(() => {
     res.status(200).end()
-  }).catch(e => {
+  }).catch(() => {
     res.status(500).end()
   })
 })

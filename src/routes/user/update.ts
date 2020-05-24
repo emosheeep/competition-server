@@ -2,7 +2,6 @@ import { Request, Response, Router } from 'express'
 import { update, transaction } from '../../db/dao'
 import { USER, UserData } from '../../db/model'
 
-
 interface RequestWithBody extends Request{
   body: {
     type: string;
@@ -11,7 +10,8 @@ interface RequestWithBody extends Request{
 }
 
 const router = Router()
-export default router.put('/update', (req: RequestWithBody, res: Response) => {
+
+router.put('/update', (req: RequestWithBody, res: Response) => {
   const { type, data } = req.body
   const { account, password } = data
   transaction(session => Promise.all([
@@ -19,7 +19,9 @@ export default router.put('/update', (req: RequestWithBody, res: Response) => {
     update(type, { account }, data, { session }, true)
   ])).then(results => {
     res.status(200).json(results)
-  }).catch(e => {
+  }).catch(() => {
     res.status(500).end()
   })
 })
+
+export default router
