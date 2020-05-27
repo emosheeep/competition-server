@@ -24,9 +24,16 @@ router.get('/file', (req, res) => {
     return res.status(400).end()
   }
   getFileInfo(name).then(info => {
-    res.status(200).json(info)
+    res.status(200).json({
+      code: 0,
+      msg: 'ok',
+      data: info
+    })
   }).catch(e => {
-    res.status(500).end(e.message)
+    res.status(200).json({
+      code: 1,
+      msg: e.message
+    })
   })
 })
 

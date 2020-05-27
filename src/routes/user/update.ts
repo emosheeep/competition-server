@@ -17,8 +17,8 @@ router.put('/update', (req: RequestWithBody, res: Response) => {
   transaction(session => Promise.all([
     update(USER, { account }, { account, password }, { session }, true),
     update(type, { account }, data, { session }, true)
-  ])).then(results => {
-    res.status(200).json(results)
+  ])).then(([, user]) => {
+    res.status(200).json(user)
   }).catch(() => {
     res.status(500).end()
   })

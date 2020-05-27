@@ -1,4 +1,5 @@
 import { Request, Router } from 'express'
+import { omit } from 'lodash'
 import { find } from '../../db/dao'
 import { USER } from '../../db/model'
 import { sign } from '../../utils/token'
@@ -32,6 +33,7 @@ router.post('/login', (req: RequestWithBody, res) => {
   }).then(result => {
     if (!result) return
     const cookieContent = JSON.stringify({ account, identity })
+    const user = omit(result.pop(), ['_id', 'password'])
     res.status(200)
     res.cookie('user', cookieContent, {
       signed: true,
@@ -41,7 +43,7 @@ router.post('/login', (req: RequestWithBody, res) => {
       code: 0,
       msg: '登陆成功',
       data: {
-        user: { account, identity },
+        user: { identity, ...user },
         token: sign({ account, identity })
       }
     })

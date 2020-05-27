@@ -3,7 +3,8 @@ import { find } from '../../db/dao'
 import { RECORD } from '../../db/model'
 
 const router = Router()
-export default router.get('/list', (req: Request, res: Response) => {
+
+router.get('/list', (req: Request, res: Response) => {
   const { query } = req
   find(RECORD, query).then(results => {
     res.json(results)
@@ -11,3 +12,5 @@ export default router.get('/list', (req: Request, res: Response) => {
     res.status(500).end()
   })
 })
+
+export default router

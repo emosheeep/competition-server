@@ -61,11 +61,20 @@ export const update = function (
   inTransaction = false
 ) {
   const model = getDocument(name)
-  return new Promise<any>(async (resolve, reject) => {
+  return new Promise<Document>(async (resolve, reject) => {
     try {
       if (!inTransaction) await connect()
-      const _ = await model.updateOne(condition, data, options)
-      resolve(_)
+      const result = await model.findOneAndUpdate(condition, data, {
+        new: true, // 返回更新后的数据
+        ...options
+      })
+      if (result) {
+        resolve(result.toObject({ versionKey: false }))
+      } else {
+        const e = new Error('未找到对应数据')
+        consola.error(`[Mongo Update Error] ${e.message}`)
+        reject(e)
+      }
     } catch (e) {
       consola.error(`[Mongo Update Error] ${e.message}`)
       reject(e)
@@ -84,7 +93,8 @@ export const find = function (name: string, condition = {}) {
     try {
       await connect()
       const values = await model.find(condition)
-      resolve(values)
+      const result = values.map(item => item.toObject({ versionKey: false }))
+      resolve(result)
     } catch (e) {
       consola.error(`[Mongo Find Error] ${e.message}`)
       reject(e)

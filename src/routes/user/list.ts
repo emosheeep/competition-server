@@ -3,6 +3,7 @@ import { find } from '../../db/dao'
 import { ADMIN, STUDENT, TEACHER } from '../../db/model'
 
 const router = Router()
+
 router.get('/list', async (req: Request, res: Response) => {
   const { type } = req.query
   try {

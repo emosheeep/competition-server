@@ -3,7 +3,8 @@ import { remove } from '../../db/dao'
 import { RECORD } from '../../db/model'
 
 const router = Router()
-export default router.delete('/delete', (req: Request, res: Response) => {
+
+router.delete('/delete', (req: Request, res: Response) => {
   const { id } = req.body
   if (!id) {
     return res.status(400).end()
@@ -14,3 +15,5 @@ export default router.delete('/delete', (req: Request, res: Response) => {
     res.status(500).end()
   })
 })
+
+export default router

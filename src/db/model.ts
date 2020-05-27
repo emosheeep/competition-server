@@ -86,11 +86,13 @@ Schemas[RECORD] = new Schema({
   date: { type: Number, required: true, trim: true },
   sid: { type: String, required: true, trim: true },
   sname: { type: String, required: true, trim: true },
-  tid: { type: String, required: true, trim: true },
-  tname: { type: String, required: true, trim: true },
   score: { type: String, trim: true },
-  uploaded: { type: Boolean, default: false },
-  reviewed: { type: Boolean, default: false }
+  tid: { type: String, trim: true },
+  tname: { type: String, trim: true },
+  uploaded: { type: Boolean, trim: true, default: false },
+  // 'pending'(未审核), 'fulfilled'(通过审核), 'rejected'(审核失败)
+  state: { type: String, trim: true, default: 'pending' },
+  description: { type: String, trim: true }
 })
 
 export default (name: string) => model(name, Schemas[name])
