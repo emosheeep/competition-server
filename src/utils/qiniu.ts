@@ -64,14 +64,38 @@ interface FileInfo {
  */
 export const getFileInfo = function (name: string): Promise<FileInfo> {
   return new Promise<FileInfo>((resolve, reject) => {
-    bucketManager.stat(bucket, name, function (err, data, { statusCode }) {
-      if (err) {
-        reject(err)
-      } else if (statusCode !== 200) {
-        reject(new Error(data.error))
-      } else {
-        resolve(data)
+    bucketManager.stat(
+      bucket,
+      name,
+      function (err, data, { statusCode }) {
+        if (err) {
+          reject(err)
+        } else if (statusCode !== 200) {
+          reject(new Error(data.error))
+        } else {
+          resolve(data)
+        }
       }
-    })
+    )
+  })
+}
+
+/**
+ * 删除文件
+ * @param name 文件名
+ */
+export const deleteFile = function (name: string) {
+  return new Promise((resolve, reject) => {
+    bucketManager.delete(
+      bucket,
+      name,
+      function (err, data) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      }
+    )
   })
 }
