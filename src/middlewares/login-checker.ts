@@ -1,26 +1,30 @@
-import { Request, Response, NextFunction } from 'express'
-import { verify } from '../utils/token'
+import passport from 'passport'
+import { Strategy, ExtractJwt } from 'passport-jwt'
+import { find } from '../db/dao'
+import { USER } from '../db/model'
+import secretKey from '../config/tokenKey'
 
-interface AuthContent {
-  account: string;
-  identity: string;
+const options = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: secretKey
 }
 
-export default function (req: Request, res: Response, next: NextFunction) {
-  const tokenObj = verify(req.headers.authorization as string) as AuthContent | null
-  const user: AuthContent = req.signedCookies.user
-    ? JSON.parse(req.signedCookies.user)
-    : null
+const strategy = new Strategy(options, (payload, done) => {
+  find(USER, {
+    account: payload.account,
+    identity: payload.identity
+  }).then(users => {
+    if (users.length !== 0) {
+      const user = users[0]
+      done(null, user)
+    } else {
+      done(null, false)
+    }
+  }).catch(err => {
+    done(err, false)
+  })
+})
 
-  if (req.path.endsWith('/login')) {
-    return next()
-  } else if (
-    !tokenObj || !user ||
-    user.account !== tokenObj.account ||
-    user.identity !== tokenObj.identity
-  ) {
-    res.status(401).end()
-  } else {
-    next()
-  }
-}
+passport.use(strategy)
+
+export default passport.authenticate('jwt', { session: false })
