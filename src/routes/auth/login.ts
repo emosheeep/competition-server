@@ -1,22 +1,13 @@
-import jwt from 'jsonwebtoken'
 import { Request, Router } from 'express'
 import { omit } from 'lodash'
-import { find } from '../db/dao'
-import { USER } from '../db/model'
-import secretKey from '../config/tokenKey'
+import { find } from '../../db/dao'
+import { USER } from '../../db/model'
+import { getRefreshToken, getToken } from '../../utils/token'
 
 interface RequestWithBody extends Request {
   body: {
     [key: string]: string | undefined
   }
-}
-
-// 生成签名
-function getToken (payload: any) {
-  const token = jwt.sign(payload, secretKey, {
-    expiresIn: 3600 * 24 * 7 // 七天过期
-  })
-  return `Bearer ${token}`
 }
 
 const router = Router()
@@ -41,19 +32,15 @@ router.post('/login', (req: RequestWithBody, res) => {
     }
   }).then(result => {
     if (!result) return
-    const cookieContent = JSON.stringify({ account, identity })
     const user = omit(result.pop(), ['_id', 'password'])
     res.status(200)
-    res.cookie('user', cookieContent, {
-      signed: true,
-      httpOnly: true,
-      maxAge: 7 * 24 * 3600 * 1000 // 一周
-    }).json({
+    res.json({
       code: 0,
       msg: '登陆成功',
       data: {
         user: { identity, ...user },
-        token: getToken({ account, identity })
+        token: getToken(),
+        refreshToken: getRefreshToken({ identity, account })
       }
     })
   }).catch(() => {
