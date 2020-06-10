@@ -18,3 +18,12 @@ app.listen(3000, function () {
     badge: true
   })
 })
+
+// 捕获可能遗漏的错误，防止程序崩溃
+process.on('uncaughtException', function (e) {
+  consola.log(e)
+})
+
+process.on('unhandledRejection', function (e) {
+  consola.log(e)
+})

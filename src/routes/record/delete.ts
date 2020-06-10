@@ -6,19 +6,19 @@ import { deleteFile } from '../../utils/qiniu'
 const router = Router()
 
 router.delete('/delete', (req, res) => {
-  const { _id } = req.body
-  if (!_id) {
+  const data = req.body
+  if (!Array.isArray(data)) {
     return res.status(400).end()
   }
-  deleteFile(_id).then(() => {
-    return remove(RECORD, { _id })
+  deleteFile(data).then(() => {
+    return remove(RECORD, { _id: { $in: data } })
   }).then(() => {
     res.status(200).json({
       code: 0,
       msg: 'ok'
     })
-  }).catch(() => {
-    res.status(500).end()
+  }).catch(e => {
+    res.status(500).end(e.message)
   })
 })
 

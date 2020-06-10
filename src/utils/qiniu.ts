@@ -84,11 +84,13 @@ export const getFileInfo = function (name: string): Promise<FileInfo> {
  * 删除文件
  * @param name 文件名
  */
-export const deleteFile = function (name: string) {
+export const deleteFile = function (names: string[]) {
+  const deleteOptions = names.map(name => {
+    return qiniu.rs.deleteOp(bucket, name)
+  })
   return new Promise((resolve, reject) => {
-    bucketManager.delete(
-      bucket,
-      name,
+    bucketManager.batch(
+      deleteOptions,
       function (err, data) {
         if (err) {
           reject(err)

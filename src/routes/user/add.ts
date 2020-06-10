@@ -37,7 +37,7 @@ router.post('/add', async (req: RequestWithBody, res) => {
       })
     }
   } catch (e) {
-    res.status(500).end()
+    res.status(500).end(e.message)
   }
 })
 

@@ -38,7 +38,8 @@ Schemas[USER] = new Schema({
  */
 Schemas[ADMIN] = new Schema({
   account: { type: String, required: true, trim: true },
-  password: { type: String, required: true, trim: true }
+  password: { type: String, required: true, trim: true },
+  name: { type: String, required: true, trim: true }
 })
 
 /**
@@ -60,7 +61,7 @@ Schemas[TEACHER] = new Schema({
   account: { type: String, required: true, trim: true },
   password: { type: String, required: true, trim: true },
   name: { type: String, required: true, trim: true },
-  dept: { type: String, required: true, trim: true },
+  rank: { type: String, trim: true }, // 职称
   description: { type: String, trim: true }
 })
 
@@ -70,7 +71,7 @@ Schemas[TEACHER] = new Schema({
 Schemas[RACE] = new Schema({
   title: { type: String, required: true, trim: true },
   sponsor: { type: String, required: true, trim: true },
-  year: { type: String, required: true, trim: true },
+  type: { type: String, required: true, trim: true },
   level: { type: String, required: true, trim: true },
   location: { type: String, required: true, trim: true },
   date: { type: Number, required: true, trim: true },
