@@ -37,7 +37,7 @@ Schemas[USER] = new Schema({
  * 管理员信息
  */
 Schemas[ADMIN] = new Schema({
-  account: { type: String, required: true, trim: true },
+  account: { type: String, required: true, trim: true, unique: true },
   password: { type: String, required: true, trim: true },
   name: { type: String, required: true, trim: true }
 })
@@ -46,7 +46,7 @@ Schemas[ADMIN] = new Schema({
  * 学生信息
  */
 Schemas[STUDENT] = new Schema({
-  account: { type: String, required: true, trim: true },
+  account: { type: String, required: true, trim: true, unique: true },
   password: { type: String, required: true, trim: true },
   name: { type: String, required: true, trim: true },
   sex: { type: String, required: true, trim: true },
@@ -58,7 +58,7 @@ Schemas[STUDENT] = new Schema({
  * 教师信息
  */
 Schemas[TEACHER] = new Schema({
-  account: { type: String, required: true, trim: true },
+  account: { type: String, required: true, trim: true, unique: true },
   password: { type: String, required: true, trim: true },
   name: { type: String, required: true, trim: true },
   rank: { type: String, trim: true }, // 职称
