@@ -71,7 +71,7 @@ export const update = function (
       if (result) {
         resolve(result.toObject({ versionKey: false }))
       } else {
-        const e = new Error('未找到对应数据')
+        const e = new Error('no such data')
         consola.error(`[Mongo Update Error] ${e.message}`)
         reject(e)
       }
