@@ -48,10 +48,10 @@ Schemas[ADMIN] = new Schema({
 Schemas[STUDENT] = new Schema({
   account: { type: String, required: true, trim: true, unique: true },
   password: { type: String, required: true, trim: true },
-  name: { type: String, required: true, trim: true },
-  sex: { type: String, required: true, trim: true },
-  grade: { type: String, required: true, trim: true },
-  classname: { type: String, required: true, trim: true }
+  name: { type: String, trim: true },
+  sex: { type: String, trim: true },
+  grade: { type: String, trim: true },
+  classname: { type: String, trim: true }
 })
 
 /**
@@ -60,7 +60,7 @@ Schemas[STUDENT] = new Schema({
 Schemas[TEACHER] = new Schema({
   account: { type: String, required: true, trim: true, unique: true },
   password: { type: String, required: true, trim: true },
-  name: { type: String, required: true, trim: true },
+  name: { type: String, trim: true },
   rank: { type: String, trim: true }, // 职称
   description: { type: String, trim: true }
 })

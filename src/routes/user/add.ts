@@ -1,4 +1,5 @@
 import { Request, Router } from 'express'
+import { genSalt, hash } from 'bcryptjs'
 import { find, transaction, insert } from '../../db/dao'
 import { USER, UserData } from '../../db/model'
 
@@ -7,11 +8,6 @@ interface RequestWithBody extends Request{
     type: string;
     data: UserData
   }
-}
-interface Account {
-  account: string;
-  password: string;
-  identity: string;
 }
 
 const router = Router()
@@ -22,6 +18,7 @@ router.post('/add', async (req: RequestWithBody, res) => {
     return res.status(400).end()
   }
   try {
+    // TODO 部分添加，返回重复的
     const users = await hasUser(type, data)
     if (users.length !== 0) {
       res.status(200).json({
@@ -58,14 +55,20 @@ function hasUser (type: string, users: UserData | UserData[]) {
   return new Promise<string[]>((resolve, reject) => {
     find(type, {
       account: { $in: accounts }
-    }).then(res => {
-      if (res.length === 0) {
+    }).then(result => {
+      if (result.length === 0) {
         resolve([])
       } else {
-        resolve(res.map(user => (user as unknown as UserData).account))
+        resolve(result.map(user => user.account))
       }
     }).catch(reject)
   })
+}
+
+interface Account {
+  account: string;
+  password: string;
+  identity: string;
 }
 
 /**
@@ -73,17 +76,23 @@ function hasUser (type: string, users: UserData | UserData[]) {
  * @param type 用户类型
  * @param values 用户数据
  */
-function addUser (type: string, values: UserData | UserData[]) {
-  let accountData: Account | Array<Account>
+async function addUser (type: string, values: UserData | UserData[]) {
+  // 生成user表的数据
+  let accountData: Account | Account[]
+
+  // 密码加盐
   if (Array.isArray(values)) {
-    accountData = values.map<Account>(item => {
-      return {
+    accountData = []
+    for (const item of values) {
+      item.password = await generatePassword(item.password)
+      accountData.push({
         account: item.account,
         password: item.password,
         identity: type
-      }
-    })
+      })
+    }
   } else {
+    values.password = await generatePassword(values.password)
     accountData = {
       account: values.account,
       password: values.password,
@@ -91,8 +100,17 @@ function addUser (type: string, values: UserData | UserData[]) {
     }
   }
 
+  // 事务操作
   return transaction(session => Promise.all([
     insert(USER, accountData, { session }, true),
     insert(type, values, { session }, true)
   ]))
+}
+
+/**
+ * 使用bcrypt加密密码
+ * @param pwd 密码
+ */
+function generatePassword (pwd: string) {
+  return genSalt(10).then(salt => hash(pwd, salt))
 }

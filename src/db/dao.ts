@@ -4,12 +4,10 @@
  * 外部仅需要在发生错误时以500拒绝请求即可，错误由内部处理，便于排查定位
  * 同时还要保证成功时，外部能顺利获取数据
  */
-import mongoose, { Document, Mongoose, ClientSession } from 'mongoose'
+import mongoose, { Mongoose, ClientSession } from 'mongoose'
 import consola from 'consola'
-import config from '../config/dbConfig'
+import { url, options } from '../config/dbConfig'
 import getDocument from './model' // mongoose文档模型
-
-const { url, options } = config
 
 // 连接mongoDB
 const connect = () => new Promise<Mongoose>((resolve, reject) => {
@@ -61,7 +59,7 @@ export const update = function (
   inTransaction = false
 ) {
   const model = getDocument(name)
-  return new Promise<Document>(async (resolve, reject) => {
+  return new Promise<{}>(async (resolve, reject) => {
     try {
       if (!inTransaction) await connect()
       const result = await model.findOneAndUpdate(condition, data, {
@@ -89,7 +87,7 @@ export const update = function (
  */
 export const find = function (name: string, condition = {}) {
   const model = getDocument(name)
-  return new Promise<Document[]>(async (resolve, reject) => {
+  return new Promise<any[]>(async (resolve, reject) => {
     try {
       await connect()
       const values = await model.find(condition)

@@ -17,6 +17,7 @@ export default function (req: Request, res: Response, next: NextFunction) {
     if (dayjs().isAfter(exp)) {
       res.status(401).end('Unauthorized')
     } else {
+      Reflect.set(req, 'user', payload) // 挂载到req上以便后面的路由使用
       next()
     }
   })
