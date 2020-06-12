@@ -1,36 +1,36 @@
 import { Request, Router } from 'express'
 import { genSalt, hash } from 'bcryptjs'
+import { partition } from 'lodash'
 import { find, transaction, insert } from '../../db/dao'
 import { USER, UserData } from '../../db/model'
 
-interface RequestWithBody extends Request{
+interface ReqWithBody extends Request{
   body: {
     type: string;
-    data: UserData
+    data: UserData | UserData[];
   }
 }
 
 const router = Router()
 
-router.post('/add', async (req: RequestWithBody, res) => {
+router.post('/add', async (req: ReqWithBody, res) => {
   const { type, data } = req.body
   if (!type || !data) {
     return res.status(400).end()
   }
   try {
-    // TODO 部分添加，返回重复的
-    const users = await hasUser(type, data)
-    if (users.length !== 0) {
+    const [exists, unexists] = await checkUser(type, data)
+    await addUser(type, unexists)
+    if (exists.length !== 0) {
       res.status(200).json({
         code: 1,
-        msg: 'user existed',
-        users
+        msg: '用户已存在',
+        data: exists.map(item => item.account)
       })
     } else {
-      await addUser(type, data)
       res.status(200).json({
         code: 0,
-        msg: 'ok'
+        msg: '添加成功'
       })
     }
   } catch (e) {
@@ -45,22 +45,17 @@ export default router
  * @param type 用户类型
  * @param users 用户数据
  */
-function hasUser (type: string, users: UserData | UserData[]) {
-  let accounts: Array<string>
-  if (Array.isArray(users)) {
-    accounts = users.map(user => user.account)
-  } else {
-    accounts = [users.account]
+function checkUser (type: string, users: UserData | UserData[]) {
+  if (!Array.isArray(users)) {
+    users = [users]
   }
-  return new Promise<string[]>((resolve, reject) => {
-    find(type, {
-      account: { $in: accounts }
-    }).then(result => {
-      if (result.length === 0) {
-        resolve([])
-      } else {
-        resolve(result.map(user => user.account))
-      }
+  const accounts = users.map(user => user.account)
+  return new Promise<Array<UserData[]>>((resolve, reject) => {
+    find(type, { account: { $in: accounts } }).then(data => {
+      const result = partition(users as UserData[], user => {
+        return !!data.find(item => item.account === user.account)
+      })
+      resolve(result) // result[0]已存在的用户，result[1]不存在的用户
     }).catch(reject)
   })
 }
