@@ -34,14 +34,16 @@ router.post('/login', (req: RequestWithBody, res) => {
     }
   }).then(result => {
     if (!result) return
-    const user = omit(result.pop(), ['_id', 'password'])
+    // 得到过滤后的用户信息
+    const tmpUser = omit(result.pop(), ['_id', 'password'])
+    const user = { identity, ...tmpUser }
     res.status(200).json({
       code: 0,
       msg: '登陆成功',
       data: {
-        user: { identity, ...user },
-        token: getToken({ identity }), // 修改这里需要同时修改 refresh 中的 token 颁发
-        refreshToken: getRefreshToken({ identity, account })
+        user,
+        token: getToken(user), // 修改这里需要同时修改 refresh 中的 token 颁发
+        refreshToken: getRefreshToken(user)
       }
     })
   }).catch(e => {

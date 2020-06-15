@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { omit } from 'lodash'
 import dayjs from 'dayjs'
 import { verify } from 'jsonwebtoken'
 import { find } from '../../db/dao'
@@ -14,8 +15,8 @@ router.get('/refresh', function (req, res) {
     return res.status(403).end()
   }
   verify(refreshToken, secretKey, function (err, payload: any) {
-    // token 解析失败，重新登录
-    if (err) {
+    // token 解析失败，或未携带token
+    if (err || !payload) {
       return res.status(403).end()
     }
     const { exp, account, identity } = payload
@@ -28,7 +29,9 @@ router.get('/refresh', function (req, res) {
       if (users.length === 0) {
         res.status(403).end()
       } else {
-        res.status(200).send(getToken({ identity }))
+        const tmpUser = omit(users.pop(), ['_id', 'password'])
+        const user = { identity, ...tmpUser }
+        res.status(200).send(getToken(user))
       }
     }).catch(e => {
       res.status(500).end(e.message)
