@@ -1,8 +1,8 @@
 import { Request, Router } from 'express'
 import { genSalt, hash } from 'bcryptjs'
 import { partition } from 'lodash'
-import { find, transaction, insert } from '../../db/dao'
-import { USER, UserData } from '../../db/model'
+import { find, insert } from '../../db/dao'
+import { UserData } from '../../db/model'
 
 interface ReqWithBody extends Request{
   body: {
@@ -96,10 +96,7 @@ async function addUser (type: string, values: UserData | UserData[]) {
   }
 
   // 事务操作
-  return transaction(session => Promise.all([
-    insert(USER, accountData, { session }, true),
-    insert(type, values, { session }, true)
-  ]))
+  return insert(type, values)
 }
 
 /**

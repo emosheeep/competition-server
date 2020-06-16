@@ -3,7 +3,6 @@ import { omit } from 'lodash'
 import dayjs from 'dayjs'
 import { verify } from 'jsonwebtoken'
 import { find } from '../../db/dao'
-import { USER } from '../../db/model'
 import secretKey from '../../config/tokenKey'
 import { getToken } from '../../utils/token'
 
@@ -25,12 +24,12 @@ router.get('/refresh', function (req, res) {
       return res.status(403).end()
     }
     // 否则刷新token
-    find(USER, { account, identity }).then(users => {
-      if (users.length === 0) {
+    find(identity, { account }).then(([user]) => {
+      if (!user) {
         res.status(403).end()
       } else {
-        const tmpUser = omit(users.pop(), ['_id', 'password'])
-        const user = { identity, ...tmpUser }
+        const result = omit(user, ['_id', 'password'])
+        user = { identity, ...result }
         res.status(200).send(getToken(user))
       }
     }).catch(e => {

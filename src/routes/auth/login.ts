@@ -2,7 +2,6 @@ import { Request, Router } from 'express'
 import { omit } from 'lodash'
 import { compareSync } from 'bcryptjs'
 import { find } from '../../db/dao'
-import { USER } from '../../db/model'
 import { getRefreshToken, getToken } from '../../utils/token'
 
 interface RequestWithBody extends Request {
@@ -18,25 +17,24 @@ router.post('/login', (req: RequestWithBody, res) => {
   if (!account || !password || !identity) {
     return res.status(400).end()
   }
-  find(USER, { account, identity }).then(([user]) => {
+  find(identity, { account }).then(([user]) => {
     if (!user) {
       res.status(200).json({
         code: 1,
         msg: '用户不存在'
       })
     } else if (compareSync(password, user.password)) {
-      return find(identity, { account }) // 信息表
+      // 过滤用户信息
+      const result = omit(user, ['_id', 'password'])
+      return { identity, ...result }
     } else {
       res.status(200).json({
         code: 2,
         msg: '密码错误'
       })
     }
-  }).then(result => {
-    if (!result) return
-    // 得到过滤后的用户信息
-    const tmpUser = omit(result.pop(), ['_id', 'password'])
-    const user = { identity, ...tmpUser }
+  }).then(user => {
+    if (!user) return
     res.status(200).json({
       code: 0,
       msg: '登陆成功',

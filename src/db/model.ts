@@ -6,7 +6,6 @@ interface ObjectWithStringKeys {
 }
 
 // 定义一些文档名称常量
-export const USER = 'user'
 export const ADMIN = 'admin'
 export const STUDENT = 'student'
 export const TEACHER = 'teacher'
@@ -25,21 +24,13 @@ export interface UserData {
 const Schemas: ObjectWithStringKeys = {}
 
 /**
- * 用户账号密码信息表格：教师、学生、管理员
- */
-Schemas[USER] = new Schema({
-  account: { type: String, required: true, trim: true },
-  password: { type: String, required: true, trim: true },
-  identity: { type: String, required: true, trim: true }
-})
-
-/**
  * 管理员信息
  */
 Schemas[ADMIN] = new Schema({
   account: { type: String, required: true, trim: true, unique: true },
   password: { type: String, required: true, trim: true },
-  name: { type: String, required: true, trim: true }
+  name: { type: String, required: true, trim: true },
+  power: { type: String, required: true, trim: true } // read / write / root
 })
 
 /**

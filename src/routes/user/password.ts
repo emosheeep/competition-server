@@ -2,7 +2,6 @@ import { Router } from 'express'
 import { compact } from 'lodash'
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs'
 import { transaction, update, find } from '../../db/dao'
-import { USER } from '../../db/model'
 
 const router = Router()
 
@@ -13,7 +12,7 @@ router.patch('/password', function (req, res) {
   if (length !== target.length) {
     return res.status(400).end()
   }
-  find(USER, { account, identity }).then(([user]) => {
+  find(identity, { account }).then(([user]) => {
     if (user) {
       return compareSync(oldVal, user.password)
     }
@@ -26,12 +25,9 @@ router.patch('/password', function (req, res) {
         msg: '原密码有误'
       })
     }
-    // 新密码加密
+    // 新密码加密后更新
     const password = hashSync(newVal, genSaltSync(10))
-    await transaction(session => Promise.all([
-      update(USER, { account, identity }, { password }, { session }, true),
-      update(identity, { account }, { password }, { session }, true)
-    ]))
+    await update(identity, { account }, { password })
     return Promise.resolve({
       code: 0,
       msg: 'ok'
