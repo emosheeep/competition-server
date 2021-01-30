@@ -83,7 +83,7 @@ Races.hasMany(Records, { foreignKey: 'race_id' });
 export function getUserModel(type: string) {
   return type === 'admin'
     ? Admins
-    : type !== 'teacher'
+    : type === 'teacher'
       ? Teachers
       : Students;
 }
