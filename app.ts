@@ -1,4 +1,5 @@
-import express from 'express';
+import express, { Response, Request, NextFunction } from 'express';
+import 'express-async-errors';
 import consola from 'consola';
 import bodyParser from 'body-parser';
 import Router from './routes';
@@ -26,4 +27,13 @@ process.on('uncaughtException', function(e) {
 
 process.on('unhandledRejection', function(e) {
   consola.log(e);
+});
+
+// @ts-ignore
+app.use((e, req: Request, res: Response, next: NextFunction) => {
+  res.json({
+    code: 500,
+    msg: e.message,
+  });
+  next(e);
 });

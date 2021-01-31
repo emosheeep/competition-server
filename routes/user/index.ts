@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { getUserModel } from '../../db/model';
+import { Op } from 'sequelize';
 import { compact, differenceBy, get, omit, toNumber } from 'lodash';
 import { compareSync } from 'bcryptjs';
 
@@ -34,64 +35,71 @@ function checkUser(type: string, users: any[]) {
 router.post('/add', async (req: Request, res: Response) => {
   const { type, data } = req.body;
   if (!type || !data) {
-    return res.status(400).end();
+    return res400(res);
   }
-  try {
-    const [exists, unexists] = await checkUser(type, Array.isArray(data) ? data : [data]);
-    console.log(exists, unexists);
-    const UserModel = getUserModel(type);
-    await UserModel.bulkCreate(unexists);
-    if (exists.length !== 0) {
-      res.status(200).json({
-        code: 1,
-        msg: '用户已存在',
-        data: exists,
-      });
-    } else {
-      res.status(200).json({
-        code: 0,
-        msg: '添加成功',
-      });
-    }
-  } catch (e) {
-    console.log(e);
-    res.status(500).end(e.message);
+  const [exists, unexists] = await checkUser(type, Array.isArray(data) ? data : [data]);
+  const UserModel = getUserModel(type);
+  await UserModel.bulkCreate(unexists);
+  if (exists.length !== 0) {
+    res.json({
+      code: 1,
+      msg: '用户已存在',
+      data: exists,
+    });
+  } else {
+    res.json({
+      code: 200,
+      msg: '添加成功',
+    });
   }
 });
 
 router.delete('/delete', (req: Request, res: Response) => {
   const { type, data } = req.body;
-  if (!Array.isArray(data)) {
-    return res.status(400).end();
+  if (!Array.isArray(data.ids)) {
+    return res400(res);
   }
   const UserModal = getUserModel(type);
   UserModal.destroy({
-    where: { [UserModal.primaryKeyAttribute]: data },
+    where: { [UserModal.primaryKeyAttribute]: data.ids },
   }).then(() => {
-    res.status(200).end();
-  }).catch(() => {
-    res.status(500).end();
+    res.json({
+      code: 200,
+      msg: '删除成功',
+    });
   });
 });
 
 router.get('/list', async (req: Request, res: Response) => {
-  const { type, offset, limit, ...otherQueries } = req.query;
-  try {
-    const Modal = getUserModel(type as string);
-    const { rows, count } = await Modal.findAndCountAll({
-      where: otherQueries,
-      offset: toNumber(offset) - 1,
-      limit: toNumber(limit),
-    });
-    res.json({
-      code: 0,
-      msg: '查询成功',
-      count,
-      data: rows.map(item => omit(item.toJSON(), 'password')),
-    });
-  } catch (e) {
-    res.status(500).end(e.message);
+  const {
+    type,
+    offset,
+    limit,
+    name,
+    class: className,
+    ...otherQueries
+  } = req.query;
+
+  if (name) {
+    otherQueries.name = { [Op.like]: `%${name}%` };
   }
+  if (className) {
+    otherQueries.class = { [Op.like]: `%${className}%` };
+  }
+
+  const Modal = getUserModel(type as string);
+  const { rows, count } = await Modal.findAndCountAll({
+    attributes: { exclude: ['password'] },
+    where: otherQueries,
+    offset: toNumber(offset) - 1,
+    limit: toNumber(limit),
+  });
+  res.json({
+    code: 200,
+    msg: '查询成功',
+    count,
+    data: rows.map(item => item.toJSON()),
+  });
 });
 
 router.patch('/password', function(req, res) {
@@ -99,7 +107,7 @@ router.patch('/password', function(req, res) {
   const target: string[] = [account, identity, oldVal, newVal];
   const { length } = compact(target); // 空值检测
   if (length !== target.length) {
-    return res.status(400).end();
+    return res400(res);
   }
   const UserModal = getUserModel(identity);
   UserModal.findByPk(account).then(user => {
@@ -108,26 +116,21 @@ router.patch('/password', function(req, res) {
   }).then(async isOk => {
     // 无匹配记录
     if (!isOk) {
-      return Promise.resolve({
+      return res.json({
         code: 1,
         msg: '原密码有误',
       });
     }
     // 新密码加密后更新
     await UserModal.update({ password: newVal }, { where: { account } });
-    return Promise.resolve({
-      code: 0,
-      msg: 'ok',
+    res.json({
+      code: 200,
+      msg: '修改成功',
     });
-  }).then(result => {
-    res.status(200).json(result);
-  }).catch(e => {
-    res.status(500).end(e.message);
   });
 });
 
 const defaultPwd = '123456';
-
 router.put('/reset', (req: Request, res: Response) => {
   const { type, account } = req.body;
   const user = get(req, 'user');
@@ -136,33 +139,41 @@ router.put('/reset', (req: Request, res: Response) => {
   const condition = [type, account, user && user.identity && user.identity === 'admin'];
   const target = compact(condition);
   if (target.length !== condition.length) {
-    return res.status(400).end();
+    return res400(res);
   }
   const UserModel = getUserModel(type);
   // 重置密码
   UserModel.update({ password: defaultPwd }, {
     where: { [UserModel.primaryKeyAttribute]: account },
   }).then(() => {
-    res.status(200).end();
-  }).catch(e => {
-    res.status(500).end(e.message);
+    res.json({
+      code: 200,
+      msg: '重置成功',
+    });
   });
 });
 
 router.put('/update', (req, res) => {
   const { type, data } = req.body;
   if (!type || !data) {
-    return res.status(400).end();
+    return res400(res);
   }
-  const { account, ...otherAttrs } = data;
   const UserModel = getUserModel(type);
+  const key = UserModel.primaryKeyAttribute;
+  const { [key]: account, ...otherAttrs } = data;
   UserModel.update(otherAttrs, {
-    where: { [UserModel.primaryKeyAttribute]: account },
-  }).then(([, result]) => {
-    res.status(200).json(omit(result, ['password']));
-  }).catch(e => {
-    res.status(500).end(e.message);
-  });
+    where: { [key]: account },
+  }).then(() => res.json({
+    code: 200,
+    msg: '修改成功',
+  }));
 });
 
 export default router;
+
+function res400(res: Response) {
+  return res.json({
+    code: 400,
+    msg: '参数有误',
+  });
+}

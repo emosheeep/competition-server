@@ -12,6 +12,8 @@ export const sequelize = new Sequelize(
     define: {
       underscored: true, // 字段以下划线（_）来分割（默认是驼峰命名风格）
       timestamps: true,
+      createdAt: 'create_time',
+      updatedAt: 'update_time',
     },
   },
 );
@@ -40,8 +42,8 @@ export const Students = sequelize.define('student', {
   sid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
   password: { type: DataTypes.STRING, allowNull: false, set: setPassword },
-  sex: { type: DataTypes.ENUM('man', 'woman') }, // 0 女, 1 男
-  grade: { type: DataTypes.STRING },
+  sex: { type: DataTypes.INTEGER }, // 0 女, 1 男
+  grade: { type: DataTypes.INTEGER },
   class: { type: DataTypes.STRING },
 });
 
@@ -49,7 +51,7 @@ export const Teachers = sequelize.define('teacher', {
   tid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
   password: { type: DataTypes.STRING, allowNull: false, set: setPassword },
-  rank: { type: DataTypes.STRING }, // 职称
+  rank: { type: DataTypes.INTEGER }, // 职称
   description: { type: DataTypes.STRING },
 });
 
