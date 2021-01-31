@@ -1,5 +1,12 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import {
+  Sequelize,
+  DataTypes,
+  Model,
+  ModelSetterOptions,
+  ModelGetterOptions,
+} from 'sequelize';
 import { genSaltSync, hashSync } from 'bcryptjs';
+import dayjs from 'dayjs';
 
 export const sequelize = new Sequelize(
   'competition', // 数据库名
@@ -14,37 +21,40 @@ export const sequelize = new Sequelize(
       timestamps: true,
       createdAt: 'create_time',
       updatedAt: 'update_time',
+      getterMethods: genGetter(
+        ['create_time', 'update_time'],
+        time => {
+          return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
+        },
+      ),
     },
   },
 );
 
-sequelize.sync().then(() => {
-  console.log('同步成功');
-});
-
-/**
- * 密码设置器, 用于拦截密码设置操作, 计算哈希密码存入数据库
- * @param{string} value 密码
- */
-function setPassword(value: string) {
-  // @ts-ignore
-  this.setDataValue('password', hashSync(value, genSaltSync(10)));
-}
-
 export const Admins = sequelize.define('admin', {
   aid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false, set: setPassword },
+  password: { type: DataTypes.STRING, allowNull: false },
   type: { type: DataTypes.INTEGER },
+}, {
+  setterMethods: {
+    ...trim(['aid', 'name']),
+    password: setPassword,
+  },
 });
 
 export const Students = sequelize.define('student', {
   sid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false, set: setPassword },
+  password: { type: DataTypes.STRING, allowNull: false },
   sex: { type: DataTypes.INTEGER }, // 0 女, 1 男
   grade: { type: DataTypes.INTEGER },
   class: { type: DataTypes.STRING },
+}, {
+  setterMethods: {
+    ...trim(['sid', 'name', 'class']),
+    password: setPassword,
+  },
 });
 
 export const Teachers = sequelize.define('teacher', {
@@ -53,6 +63,11 @@ export const Teachers = sequelize.define('teacher', {
   password: { type: DataTypes.STRING, allowNull: false, set: setPassword },
   rank: { type: DataTypes.INTEGER }, // 职称
   description: { type: DataTypes.STRING },
+}, {
+  setterMethods: {
+    ...trim(['tid', 'name', 'description']),
+    password: setPassword,
+  },
 });
 
 export const Races = sequelize.define('race', {
@@ -88,4 +103,60 @@ export function getUserModel(type: string) {
     : type === 'teacher'
       ? Teachers
       : Students;
+}
+
+sequelize.sync().then(() => {
+  console.log('同步成功');
+});
+
+/**
+ * 批量生成setter
+ * @param keys 需要生成setter的字段
+ * @param convert 定义数据转化方式
+ */
+function genSetter(
+  keys: string[],
+  convert: (value: any) => any,
+) {
+  const result: ModelSetterOptions = {};
+  for (const key of keys) {
+    result[key] = function(value: string) {
+      this.setDataValue(key, convert(value));
+    };
+  }
+  return result;
+}
+
+/**
+ * 批量生成getter
+ * @param keys 需要生成getter的字段
+ * @param convert 定义数据转化方式
+ */
+function genGetter(
+  keys: string[],
+  convert: (value: any) => any,
+) {
+  const result: ModelGetterOptions = {};
+  for (const key of keys) {
+    result[key] = function() {
+      return convert(this.getDataValue(key));
+    };
+  }
+  return result;
+}
+
+/**
+ * 密码设置器, 用于拦截密码设置操作, 计算哈希密码存入数据库
+ * @param{string} value 密码
+ */
+function setPassword(this: Model, value: string) {
+  this.setDataValue('password', hashSync(value.trim(), genSaltSync(10)));
+}
+
+/**
+ * 用于对字符串进行trim操作
+ * @param{string[]} keys
+ */
+function trim(keys: string[]) {
+  return genSetter(keys, value => value.trim());
 }
