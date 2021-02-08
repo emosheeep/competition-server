@@ -54,19 +54,18 @@ router.post('/add', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/delete', (req: Request, res: Response) => {
+router.delete('/delete', async (req: Request, res: Response) => {
   const { type, data } = req.body;
   if (!Array.isArray(data.ids)) {
     return res400(res);
   }
   const UserModal = getUserModel(type);
-  UserModal.destroy({
+  await UserModal.destroy({
     where: { [UserModal.primaryKeyAttribute]: data.ids },
-  }).then(() => {
-    res.json({
-      code: 200,
-      msg: '删除成功',
-    });
+  });
+  res.json({
+    code: 200,
+    msg: '删除成功',
   });
 });
 
@@ -102,7 +101,7 @@ router.get('/list', async (req: Request, res: Response) => {
   });
 });
 
-router.patch('/password', function(req, res) {
+router.patch('/password', async (req: Request, res: Response) => {
   const { account, identity, oldVal, newVal } = req.body;
   const target: string[] = [account, identity, oldVal, newVal];
   const { length } = compact(target); // 空值检测
@@ -110,28 +109,30 @@ router.patch('/password', function(req, res) {
     return res400(res);
   }
   const UserModal = getUserModel(identity);
-  UserModal.findByPk(account).then(user => {
-    if (!user) return false;
-    return compareSync(oldVal, get(user.toJSON(), 'password'));
-  }).then(async isOk => {
-    // 无匹配记录
-    if (!isOk) {
-      return res.json({
-        code: 1,
-        msg: '原密码有误',
-      });
-    }
-    // 新密码加密后更新
-    await UserModal.update({ password: newVal }, { where: { account } });
-    res.json({
-      code: 200,
-      msg: '修改成功',
+  const user = await UserModal.findByPk(account);
+  if (!user) {
+    return res.json({
+      code: 2,
+      msg: '用户不存在',
     });
+  }
+  // 无匹配记录
+  if (!compareSync(oldVal, get(user.toJSON(), 'password'))) {
+    return res.json({
+      code: 1,
+      msg: '原密码有误',
+    });
+  }
+  // 新密码加密后更新
+  await UserModal.update({ password: newVal }, { where: { account } });
+  res.json({
+    code: 200,
+    msg: '修改成功',
   });
 });
 
 const defaultPwd = '123456';
-router.put('/reset', (req: Request, res: Response) => {
+router.put('/reset', async (req: Request, res: Response) => {
   const { type, account } = req.body;
   const user = get(req, 'user');
 
@@ -143,17 +144,16 @@ router.put('/reset', (req: Request, res: Response) => {
   }
   const UserModel = getUserModel(type);
   // 重置密码
-  UserModel.update({ password: defaultPwd }, {
+  await UserModel.update({ password: defaultPwd }, {
     where: { [UserModel.primaryKeyAttribute]: account },
-  }).then(() => {
-    res.json({
-      code: 200,
-      msg: '重置成功',
-    });
+  });
+  res.json({
+    code: 200,
+    msg: '重置成功',
   });
 });
 
-router.put('/update', (req, res) => {
+router.put('/update', async (req: Request, res: Response) => {
   const { type, data } = req.body;
   if (!type || !data) {
     return res400(res);
@@ -161,12 +161,13 @@ router.put('/update', (req, res) => {
   const UserModel = getUserModel(type);
   const key = UserModel.primaryKeyAttribute;
   const { [key]: account, ...otherAttrs } = data;
-  UserModel.update(otherAttrs, {
+  await UserModel.update(otherAttrs, {
     where: { [key]: account },
-  }).then(() => res.json({
+  });
+  res.json({
     code: 200,
     msg: '修改成功',
-  }));
+  });
 });
 
 export default router;
