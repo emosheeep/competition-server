@@ -1,61 +1,85 @@
-import { Router } from 'express';
-import { pickBy, toNumber } from 'lodash';
-import { Races } from '../../db/model';
+import { Response, Request, Router } from 'express';
+import { toNumber } from 'lodash';
+import { Races, likeQuery } from '../../db/model';
+import { Op } from 'sequelize';
 
 const router = Router();
-export default router;
 
-router.get('/list', (req, res) => {
-  const { limit, offset, ...otherQuery } = req.query;
-  Races.findAll({
-    where: pickBy(otherQuery),
+router.get('/list', async (req: Request, res: Response) => {
+  const {
+    limit,
+    offset,
+    title,
+    location,
+    sponsor,
+    date,
+    ...query
+  } = req.query;
+
+  Object.assign(query, likeQuery({ title, location, sponsor }));
+  if (typeof date === 'string') {
+    query.date = { [Op.between]: date.split('~') };
+  }
+
+  const { rows, count } = await Races.findAndCountAll({
+    where: query,
     limit: toNumber(limit),
     offset: toNumber(offset) - 1,
-  }).then(results => {
-    res.status(200).json(results.map(item => item.toJSON()));
-  }).catch(() => {
-    res.status(500).end();
+  });
+  res.json({
+    code: 200,
+    msg: '查询成功',
+    count,
+    data: rows.map(item => item.toJSON()),
   });
 });
 
-router.post('/add', (req, res) => {
+router.post('/add', async (req: Request, res: Response) => {
   const data = req.body;
   if (!data) {
-    return res.status(400).end();
+    return res400(res);
   }
-  Races.create(data).then(result => {
-    res.status(200).json(result.toJSON());
-  }).catch(() => {
-    res.status(500).end();
+  await Races.create(data);
+  res.json({
+    code: 200,
+    msg: '添加成功',
   });
 });
 
-router.delete('/delete', (req, res) => {
+router.delete('/delete', async (req: Request, res: Response) => {
   const data = req.body;
   if (!Array.isArray(data)) {
-    return res.status(400).end();
+    return res400(res);
   }
-  Races.destroy({
-    where: { rid: data },
-  }).then(() => {
-    res.status(200).end();
-  }).catch(() => {
-    res.status(500).end();
+  await Races.destroy({
+    where: { race_id: data },
+  });
+  res.json({
+    code: 200,
+    msg: '删除成功',
   });
 });
 
-router.put('/update', function(req, res) {
+router.put('/update', async (req: Request, res: Response) => {
   const data = req.body;
-  const { _id } = data;
-  if (!_id) {
-    return res.status(400).end();
+  const { race_id, ...otherData } = data;
+  if (!race_id) {
+    return res400(res);
   }
-  Races.update(data, {
-    where: { rid: _id },
-    returning: true,
-  }).then(([, result]) => {
-    res.status(200).json(result.map(item => item.toJSON()));
-  }).catch(() => {
-    res.status(500).end();
+  await Races.update(otherData, {
+    where: { [Races.primaryKeyAttribute]: race_id },
+  });
+  res.json({
+    code: 200,
+    msg: '修改成功',
   });
 });
+
+export default router;
+
+function res400(res: Response) {
+  return res.json({
+    code: 400,
+    msg: '参数有误',
+  });
+}

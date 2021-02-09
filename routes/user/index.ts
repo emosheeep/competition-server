@@ -1,6 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { getUserModel } from '../../db/model';
-import { Op } from 'sequelize';
+import { getUserModel, likeQuery } from '../../db/model';
 import { compact, differenceBy, get, omit, toNumber } from 'lodash';
 import { compareSync } from 'bcryptjs';
 
@@ -76,20 +75,18 @@ router.get('/list', async (req: Request, res: Response) => {
     limit,
     name,
     class: className,
-    ...otherQueries
+    ...query
   } = req.query;
 
-  if (name) {
-    otherQueries.name = { [Op.like]: `%${name}%` };
-  }
-  if (className) {
-    otherQueries.class = { [Op.like]: `%${className}%` };
-  }
+  Object.assign(query, likeQuery({
+    name,
+    class: className,
+  }));
 
   const Modal = getUserModel(type as string);
   const { rows, count } = await Modal.findAndCountAll({
     attributes: { exclude: ['password'] },
-    where: otherQueries,
+    where: query,
     offset: toNumber(offset) - 1,
     limit: toNumber(limit),
   });

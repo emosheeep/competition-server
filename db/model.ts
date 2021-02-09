@@ -4,6 +4,7 @@ import {
   Model,
   ModelSetterOptions,
   ModelGetterOptions,
+  Op,
 } from 'sequelize';
 import { genSaltSync, hashSync } from 'bcryptjs';
 import dayjs from 'dayjs';
@@ -22,7 +23,7 @@ export const sequelize = new Sequelize(
       createdAt: 'create_time',
       updatedAt: 'update_time',
       getterMethods: genGetter(
-        ['create_time', 'update_time'],
+        ['create_time', 'update_time', 'date'],
         time => {
           return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
         },
@@ -30,6 +31,10 @@ export const sequelize = new Sequelize(
     },
   },
 );
+
+sequelize.sync().then(() => {
+  console.log('同步成功');
+});
 
 export const Admins = sequelize.define('admin', {
   aid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
@@ -47,9 +52,9 @@ export const Students = sequelize.define('student', {
   sid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
   password: { type: DataTypes.STRING, allowNull: false },
-  sex: { type: DataTypes.INTEGER }, // 0 女, 1 男
-  grade: { type: DataTypes.INTEGER },
-  class: { type: DataTypes.STRING },
+  sex: { type: DataTypes.INTEGER, allowNull: false }, // 0 女, 1 男
+  grade: { type: DataTypes.INTEGER, allowNull: false },
+  class: { type: DataTypes.STRING, allowNull: false },
 }, {
   setterMethods: {
     ...trim(['sid', 'name', 'class']),
@@ -61,8 +66,8 @@ export const Teachers = sequelize.define('teacher', {
   tid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
   password: { type: DataTypes.STRING, allowNull: false, set: setPassword },
-  rank: { type: DataTypes.INTEGER }, // 职称
-  description: { type: DataTypes.STRING },
+  rank: { type: DataTypes.INTEGER, allowNull: false }, // 职称
+  description: { type: DataTypes.STRING, allowNull: false },
 }, {
   setterMethods: {
     ...trim(['tid', 'name', 'description']),
@@ -75,19 +80,23 @@ export const Races = sequelize.define('race', {
   title: { type: DataTypes.STRING, allowNull: false },
   sponsor: { type: DataTypes.STRING, allowNull: false },
   type: { type: DataTypes.STRING, allowNull: false },
-  level: { type: DataTypes.STRING, allowNull: false },
+  level: { type: DataTypes.INTEGER, allowNull: false },
   location: { type: DataTypes.STRING, allowNull: false },
   date: { type: DataTypes.DATE, allowNull: false },
   description: { type: DataTypes.STRING, allowNull: false },
+}, {
+  setterMethods: {
+    ...trim(['title', 'sponsor', 'location', 'description']),
+  },
 });
 
 export const Records = sequelize.define('record', {
   record_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  title: { type: DataTypes.STRING },
-  date: { type: DataTypes.DATE },
+  title: { type: DataTypes.STRING, allowNull: false },
+  date: { type: DataTypes.DATE, allowNull: false },
   score: { type: DataTypes.STRING },
   status: { type: DataTypes.INTEGER, defaultValue: 0 },
-  description: { type: DataTypes.STRING },
+  description: { type: DataTypes.STRING, allowNull: false },
 });
 
 Records.belongsTo(Students, { foreignKey: 'sid' });
@@ -104,10 +113,6 @@ export function getUserModel(type: string) {
       ? Teachers
       : Students;
 }
-
-sequelize.sync().then(() => {
-  console.log('同步成功');
-});
 
 /**
  * 批量生成setter
@@ -159,4 +164,17 @@ function setPassword(this: Model, value: string) {
  */
 function trim(keys: string[]) {
   return genSetter(keys, value => value.trim());
+}
+
+/**
+ * 构造`%{query}%`查询
+ * @param query
+ */
+export function likeQuery(query: object) {
+  const result: Record<string, object> = {};
+  for (const [key, value] of Object.entries(query)) {
+    if (!value) continue;
+    result[key] = { [Op.substring]: value };
+  }
+  return result;
 }
