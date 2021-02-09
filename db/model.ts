@@ -92,11 +92,9 @@ export const Races = sequelize.define('race', {
 
 export const Records = sequelize.define('record', {
   record_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  title: { type: DataTypes.STRING, allowNull: false },
-  date: { type: DataTypes.DATE, allowNull: false },
-  score: { type: DataTypes.STRING },
   status: { type: DataTypes.INTEGER, defaultValue: 0 },
-  description: { type: DataTypes.STRING, allowNull: false },
+  score: { type: DataTypes.STRING },
+  description: { type: DataTypes.STRING },
 });
 
 Records.belongsTo(Students, { foreignKey: 'sid' });
@@ -167,7 +165,7 @@ function trim(keys: string[]) {
 }
 
 /**
- * 构造`%{query}%`查询
+ * 构造`%{query}%`查询, 空字段将被过滤
  * @param query
  */
 export function likeQuery(query: object) {
