@@ -5,7 +5,7 @@ import { Op } from 'sequelize';
 
 const router = Router();
 
-router.get('/list', async (req: Request, res: Response) => {
+router.get('/race/list', async (req: Request, res: Response) => {
   const {
     limit,
     offset,
@@ -34,7 +34,7 @@ router.get('/list', async (req: Request, res: Response) => {
   });
 });
 
-router.post('/add', async (req: Request, res: Response) => {
+router.post('/race/add', async (req: Request, res: Response) => {
   const data = req.body;
   if (!data) {
     return res400(res);
@@ -46,7 +46,7 @@ router.post('/add', async (req: Request, res: Response) => {
   });
 });
 
-router.delete('/delete', async (req: Request, res: Response) => {
+router.delete('/race/delete', async (req: Request, res: Response) => {
   const data = req.body;
   if (!Array.isArray(data)) {
     return res400(res);
@@ -60,7 +60,7 @@ router.delete('/delete', async (req: Request, res: Response) => {
   });
 });
 
-router.put('/update', async (req: Request, res: Response) => {
+router.put('/race/update', async (req: Request, res: Response) => {
   const data = req.body;
   const { race_id, ...otherData } = data;
   if (!race_id) {

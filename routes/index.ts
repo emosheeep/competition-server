@@ -10,8 +10,8 @@ const router = Router();
 router.use('/auth', Auth);
 
 router.use(loginChecker);
-router.use('/user', User);
-router.use('/race', Race);
-router.use('/record', Record);
+router.use(User);
+router.use(Race);
+router.use(Record);
 
 export default router;

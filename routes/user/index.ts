@@ -31,7 +31,7 @@ function checkUser(type: string, users: any[]) {
   });
 }
 
-router.post('/add', async (req: Request, res: Response) => {
+router.post('/user/add', async (req: Request, res: Response) => {
   const { type, data } = req.body;
   if (!type || !data) {
     return res400(res);
@@ -53,7 +53,7 @@ router.post('/add', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/delete', async (req: Request, res: Response) => {
+router.delete('/user/delete', async (req: Request, res: Response) => {
   const { type, data } = req.body;
   if (!Array.isArray(data.ids)) {
     return res400(res);
@@ -68,7 +68,7 @@ router.delete('/delete', async (req: Request, res: Response) => {
   });
 });
 
-router.get('/list', async (req: Request, res: Response) => {
+router.get('/user/list', async (req: Request, res: Response) => {
   const {
     type,
     offset,
@@ -98,7 +98,7 @@ router.get('/list', async (req: Request, res: Response) => {
   });
 });
 
-router.patch('/password', async (req: Request, res: Response) => {
+router.patch('/user/password', async (req: Request, res: Response) => {
   const { account, identity, oldVal, newVal } = req.body;
   const target: string[] = [account, identity, oldVal, newVal];
   const { length } = compact(target); // 空值检测
@@ -129,7 +129,7 @@ router.patch('/password', async (req: Request, res: Response) => {
 });
 
 const defaultPwd = '123456';
-router.put('/reset', async (req: Request, res: Response) => {
+router.put('/user/reset', async (req: Request, res: Response) => {
   const { type, account } = req.body;
   const user = get(req, 'user');
 
@@ -150,7 +150,7 @@ router.put('/reset', async (req: Request, res: Response) => {
   });
 });
 
-router.put('/update', async (req: Request, res: Response) => {
+router.put('/user/update', async (req: Request, res: Response) => {
   const { type, data } = req.body;
   if (!type || !data) {
     return res400(res);

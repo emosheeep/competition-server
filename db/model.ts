@@ -32,20 +32,8 @@ export const sequelize = new Sequelize(
   },
 );
 
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
   console.log('同步成功');
-});
-
-export const Admins = sequelize.define('admin', {
-  aid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
-  name: { type: DataTypes.STRING, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false },
-  type: { type: DataTypes.INTEGER },
-}, {
-  setterMethods: {
-    ...trim(['aid', 'name']),
-    password: setPassword,
-  },
 });
 
 export const Students = sequelize.define('student', {
@@ -105,11 +93,9 @@ Records.belongsTo(Races, { foreignKey: 'race_id' });
 Races.hasMany(Records, { foreignKey: 'race_id' });
 
 export function getUserModel(type: string) {
-  return type === 'admin'
-    ? Admins
-    : type === 'teacher'
-      ? Teachers
-      : Students;
+  return type === 'teacher'
+    ? Teachers
+    : Students;
 }
 
 /**
