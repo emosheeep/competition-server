@@ -7,8 +7,7 @@ import loginChecker from '../middlewares/login-checker';
 
 const router = Router();
 
-router.use('/auth', Auth);
-
+router.use(Auth);
 router.use(loginChecker);
 router.use(User);
 router.use(Race);

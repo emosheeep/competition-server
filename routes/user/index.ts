@@ -5,31 +5,21 @@ import { compareSync } from 'bcryptjs';
 
 const router = Router();
 
-/**
- * 判断用户是否已存在
- * @param type 用户类型
- * @param users 用户数据
- */
-function checkUser(type: string, users: any[]) {
-  return new Promise<Array<Array<object>>>((resolve, reject) => {
-    const model = getUserModel(type);
-    const key = model.primaryKeyAttribute;
-    model.findAll({
-      where: { [key]: users.map(item => get(item, key)) },
-    }).then((data: any[] | undefined) => {
-      let exist: object[] = [];
-      let notExist: object[] = [];
-      if (!data) notExist = [...users];
-      else {
-        exist = data.map(item => omit(item.toJSON(), 'password'));
-        notExist = differenceBy(users, exist, (a: any, b: any) => {
-          return get(a, key) === get(b, key);
-        });
-      }
-      resolve([exist, notExist]);
-    }).catch(reject);
+router.get('/get_user', async (req: Request, res: Response) => {
+  const { identity, account } = get(req, 'user') ?? {};
+  const UserModel = getUserModel(identity);
+  const user = await UserModel.findByPk(account, {
+    attributes: ['name'],
   });
-}
+  res.json({
+    code: 200,
+    msg: 'success',
+    data: Object.assign({}, user?.toJSON(), {
+      account,
+      identity,
+    }),
+  });
+});
 
 router.post('/user/add', async (req: Request, res: Response) => {
   const { type, data } = req.body;
@@ -114,34 +104,27 @@ router.patch('/user/password', async (req: Request, res: Response) => {
     });
   }
   // 无匹配记录
-  if (!compareSync(oldVal, get(user.toJSON(), 'password'))) {
+  if (!compareSync(oldVal, user.getDataValue('password'))) {
     return res.json({
       code: 1,
       msg: '原密码有误',
     });
   }
   // 新密码加密后更新
-  await UserModal.update({ password: newVal }, { where: { account } });
+  await UserModal.update({ password: newVal }, {
+    where: { [UserModal.primaryKeyAttribute]: account },
+  });
   res.json({
     code: 200,
     msg: '修改成功',
   });
 });
 
-const defaultPwd = '123456';
 router.put('/user/reset', async (req: Request, res: Response) => {
   const { type, account } = req.body;
-  const user = get(req, 'user');
-
-  // 权限校验
-  const condition = [type, account, user && user.identity && user.identity === 'admin'];
-  const target = compact(condition);
-  if (target.length !== condition.length) {
-    return res400(res);
-  }
   const UserModel = getUserModel(type);
   // 重置密码
-  await UserModel.update({ password: defaultPwd }, {
+  await UserModel.update({ password: '123456' }, {
     where: { [UserModel.primaryKeyAttribute]: account },
   });
   res.json({
@@ -173,5 +156,31 @@ function res400(res: Response) {
   return res.json({
     code: 400,
     msg: '参数有误',
+  });
+}
+
+/**
+ * 判断用户是否已存在
+ * @param type 用户类型
+ * @param users 用户数据
+ */
+function checkUser(type: string, users: any[]) {
+  return new Promise<Array<Array<object>>>((resolve, reject) => {
+    const model = getUserModel(type);
+    const key = model.primaryKeyAttribute;
+    model.findAll({
+      where: { [key]: users.map(item => get(item, key)) },
+    }).then((data: any[] | undefined) => {
+      let exist: object[] = [];
+      let notExist: object[] = [];
+      if (!data) notExist = [...users];
+      else {
+        exist = data.map(item => omit(item.toJSON(), 'password'));
+        notExist = differenceBy(users, exist, (a: any, b: any) => {
+          return get(a, key) === get(b, key);
+        });
+      }
+      resolve([exist, notExist]);
+    }).catch(reject);
   });
 }

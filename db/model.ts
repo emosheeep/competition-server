@@ -93,9 +93,7 @@ Records.belongsTo(Races, { foreignKey: 'race_id' });
 Races.hasMany(Records, { foreignKey: 'race_id' });
 
 export function getUserModel(type: string) {
-  return type === 'teacher'
-    ? Teachers
-    : Students;
+  return type === 'teacher' ? Teachers : Students;
 }
 
 /**

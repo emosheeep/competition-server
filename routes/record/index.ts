@@ -8,7 +8,7 @@ const router = Router();
 
 router.use(File);
 
-router.get('/race/list', async (req: Request, res: Response) => {
+router.get('/record/list', async (req: Request, res: Response) => {
   const { limit, offset, tname, sname, title, score, ...recordQuery } = req.query;
   Object.assign(recordQuery, likeQuery({
     score,
@@ -38,7 +38,7 @@ router.get('/race/list', async (req: Request, res: Response) => {
   });
 });
 
-router.delete('/race/delete', async (req: Request, res: Response) => {
+router.delete('/record/delete', async (req: Request, res: Response) => {
   const data = req.body;
   if (!Array.isArray(data)) {
     return res400(res);
@@ -50,7 +50,7 @@ router.delete('/race/delete', async (req: Request, res: Response) => {
   });
 });
 
-router.post('/race/add', async (req: Request, res: Response) => {
+router.post('/record/add', async (req: Request, res: Response) => {
   const data = req.body;
   if (!data) return res400(res);
   const msg = await validateRecord(data);
@@ -63,7 +63,7 @@ router.post('/race/add', async (req: Request, res: Response) => {
   });
 });
 
-router.patch('/race/update', async (req: Request, res: Response) => {
+router.patch('/record/update', async (req: Request, res: Response) => {
   const { record_id, ...data } = req.body;
   await Records.update(data, { where: { record_id } });
   res.json({

@@ -2,16 +2,27 @@ import express, { Response, Request, NextFunction } from 'express';
 import 'express-async-errors';
 import consola from 'consola';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import Router from './routes';
 
 const app = express();
 
 // 中间件
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // 路由
 app.use('/api', Router);
+
+// @ts-ignore 错误处理
+app.use((e, req: Request, res: Response, next: NextFunction) => {
+  res.json({
+    code: 500,
+    msg: e.message,
+  });
+  next(e);
+});
 
 app.listen(3000, function() {
   consola.ready({
@@ -27,13 +38,4 @@ process.on('uncaughtException', function(e) {
 
 process.on('unhandledRejection', function(e) {
   consola.log(e);
-});
-
-// @ts-ignore
-app.use((e, req: Request, res: Response, next: NextFunction) => {
-  res.json({
-    code: 500,
-    msg: e.message,
-  });
-  next(e);
 });
