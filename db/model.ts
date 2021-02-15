@@ -9,28 +9,26 @@ import {
 import { genSaltSync, hashSync } from 'bcryptjs';
 import dayjs from 'dayjs';
 
-export const sequelize = new Sequelize(
-  'competition', // 数据库名
-  'root', // 用户名
-  '15591453874', // 用户密码
-  {
-    dialect: 'mysql', // 数据库使用mysql
-    host: '39.108.76.90', // 数据库服务器ip
-    port: 3306, // 数据库服务器端口
-    define: {
-      underscored: true, // 字段以下划线（_）来分割（默认是驼峰命名风格）
-      timestamps: true,
-      createdAt: 'create_time',
-      updatedAt: 'update_time',
-      getterMethods: genGetter(
-        ['create_time', 'update_time', 'date'],
-        time => {
-          return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
-        },
-      ),
-    },
+export const sequelize = new Sequelize({
+  database: 'competition', // 数据库名
+  username: 'root', // 用户名
+  password: '15591453874', // 用户密码
+  dialect: 'mysql', // 数据库使用mysql
+  host: '39.108.76.90', // 数据库服务器ip
+  port: 3306, // 数据库服务器端口
+  define: {
+    underscored: true, // 字段以下划线（_）来分割（默认是驼峰命名风格）
+    timestamps: true,
+    createdAt: 'create_time',
+    updatedAt: 'update_time',
+    getterMethods: genGetter(
+      ['create_time', 'update_time', 'date'],
+      time => {
+        return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
+      },
+    ),
   },
-);
+});
 
 sequelize.sync({ alter: true }).then(() => {
   console.log('同步成功');
