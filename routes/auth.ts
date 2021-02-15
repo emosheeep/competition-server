@@ -1,8 +1,8 @@
 import { Request, Response, Router } from 'express';
 import { compareSync } from 'bcryptjs';
-import { getUserModel } from '../../db/model';
+import { getUserModel } from '../db/model';
 import { sign } from 'jsonwebtoken';
-import secretKey from '../../config/tokenKey';
+import secretKey from '../config/tokenKey';
 import dayjs from 'dayjs';
 
 const router = Router();

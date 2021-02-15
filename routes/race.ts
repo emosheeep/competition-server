@@ -1,6 +1,6 @@
 import { Response, Request, Router } from 'express';
 import { toNumber } from 'lodash';
-import { Races, likeQuery } from '../../db/model';
+import { Races, likeQuery } from '../db/model';
 import { Op } from 'sequelize';
 
 const router = Router();
