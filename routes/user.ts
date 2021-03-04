@@ -9,7 +9,7 @@ router.get('/get_user', async (req: Request, res: Response) => {
   const { identity, account } = get(req, 'user') ?? {};
   const UserModel = getUserModel(identity);
   const user = await UserModel.findByPk(account, {
-    attributes: ['name'],
+    attributes: { exclude: ['password', 'create_time', 'update_time'] },
   });
   res.json({
     code: 200,
@@ -27,20 +27,19 @@ router.post('/user/add', async (req: Request, res: Response) => {
     return res400(res);
   }
   const [exists, unexists] = await checkUser(type, Array.isArray(data) ? data : [data]);
-  const UserModel = getUserModel(type);
-  await UserModel.bulkCreate(unexists);
   if (exists.length !== 0) {
-    res.json({
+    return res.json({
       code: 1,
       msg: '用户已存在',
       data: exists,
     });
-  } else {
-    res.json({
-      code: 200,
-      msg: '添加成功',
-    });
   }
+  const UserModel = getUserModel(type);
+  await UserModel.bulkCreate(unexists);
+  res.json({
+    code: 200,
+    msg: '添加成功',
+  });
 });
 
 router.delete('/user/delete', async (req: Request, res: Response) => {
@@ -77,6 +76,7 @@ router.get('/user/list', async (req: Request, res: Response) => {
   const { rows, count } = await Modal.findAndCountAll({
     attributes: { exclude: ['password'] },
     where: query,
+    order: [['create_time', 'DESC']],
     offset: toNumber(offset) - 1,
     limit: toNumber(limit),
   });

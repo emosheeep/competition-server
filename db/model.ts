@@ -30,10 +30,6 @@ export const sequelize = new Sequelize({
   },
 });
 
-sequelize.sync({ alter: true }).then(() => {
-  console.log('同步成功');
-});
-
 export const Students = sequelize.define('student', {
   sid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
@@ -80,7 +76,11 @@ export const Records = sequelize.define('record', {
   record_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   status: { type: DataTypes.INTEGER, defaultValue: 0 },
   score: { type: DataTypes.STRING },
-  description: { type: DataTypes.STRING },
+  description: { type: DataTypes.STRING, defaultValue: '' },
+}, {
+  setterMethods: {
+    ...trim(['score', 'description']),
+  },
 });
 
 Records.belongsTo(Students, { foreignKey: 'sid' });
@@ -143,7 +143,7 @@ function setPassword(this: Model, value: string) {
  * @param{string[]} keys
  */
 function trim(keys: string[]) {
-  return genSetter(keys, value => value.trim());
+  return genSetter(keys, value => value?.trim());
 }
 
 /**

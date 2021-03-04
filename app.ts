@@ -4,6 +4,7 @@ import consola from 'consola';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import Router from './routes';
+import { sequelize } from './db/model';
 
 const app = express();
 
@@ -25,9 +26,11 @@ app.use((e, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.listen(3000, function() {
-  consola.ready({
-    message: `Server listening on http://localhost:${3000}`,
-    badge: true,
+  sequelize.sync({ alter: true }).then(() => {
+    consola.ready({
+      message: `Server is listening on http://localhost:${3000}`,
+      badge: true,
+    });
   });
 });
 
