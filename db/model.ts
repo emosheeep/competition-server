@@ -16,9 +16,11 @@ export const sequelize = new Sequelize({
   dialect: 'mysql', // 数据库使用mysql
   host: '39.108.76.90', // 数据库服务器ip
   port: 3306, // 数据库服务器端口
+  sync: { alter: true },
   define: {
+    charset: 'utf8',
     underscored: true, // 字段以下划线（_）来分割（默认是驼峰命名风格）
-    timestamps: true,
+    timestamps: false,
     createdAt: 'create_time',
     updatedAt: 'update_time',
     getterMethods: genGetter(
@@ -38,6 +40,7 @@ export const Students = sequelize.define('student', {
   grade: { type: DataTypes.INTEGER, allowNull: false },
   class: { type: DataTypes.STRING, allowNull: false },
 }, {
+  timestamps: true,
   setterMethods: {
     ...trim(['sid', 'name', 'class']),
     password: setPassword,
@@ -51,6 +54,7 @@ export const Teachers = sequelize.define('teacher', {
   rank: { type: DataTypes.INTEGER, allowNull: false }, // 职称
   description: { type: DataTypes.STRING, allowNull: false },
 }, {
+  timestamps: true,
   setterMethods: {
     ...trim(['tid', 'name', 'description']),
     password: setPassword,
@@ -67,6 +71,7 @@ export const Races = sequelize.define('race', {
   date: { type: DataTypes.DATE, allowNull: false },
   description: { type: DataTypes.STRING, allowNull: false },
 }, {
+  timestamps: true,
   setterMethods: {
     ...trim(['title', 'sponsor', 'location', 'description']),
   },
@@ -78,6 +83,7 @@ export const Records = sequelize.define('record', {
   score: { type: DataTypes.STRING },
   description: { type: DataTypes.STRING, defaultValue: '' },
 }, {
+  timestamps: true,
   setterMethods: {
     ...trim(['score', 'description']),
   },
@@ -89,6 +95,59 @@ Records.belongsTo(Teachers, { foreignKey: 'tid' });
 Teachers.hasMany(Records, { foreignKey: 'tid' });
 Records.belongsTo(Races, { foreignKey: 'race_id' });
 Races.hasMany(Records, { foreignKey: 'race_id' });
+
+export const Roles = sequelize.define('role', {
+  label: { type: DataTypes.STRING, allowNull: false, unique: true },
+  description: { type: DataTypes.STRING },
+}, {
+  setterMethods: {
+    ...trim(['label', 'description']),
+  },
+});
+
+export const Permissions = sequelize.define('permission', {
+  label: { type: DataTypes.STRING, allowNull: false, unique: true },
+  description: { type: DataTypes.STRING },
+  actions: { type: DataTypes.JSON },
+}, {
+  setterMethods: {
+    ...trim(['label', 'description']),
+  },
+});
+
+export const StudentRole = sequelize.define('student_role', {
+  sid: { type: DataTypes.STRING },
+  role_id: { type: DataTypes.INTEGER },
+}, {
+  freezeTableName: true,
+});
+
+export const TeacherRole = sequelize.define('teacher_role', {
+  tid: { type: DataTypes.STRING },
+  role_id: { type: DataTypes.INTEGER },
+}, {
+  freezeTableName: true,
+});
+
+// 学生、教师与角色的映射关系
+Roles.belongsToMany(Students, {
+  through: StudentRole,
+  foreignKey: 'sid',
+  otherKey: 'role_id',
+});
+Roles.belongsToMany(Teachers, {
+  through: TeacherRole,
+  foreignKey: 'tid',
+  otherKey: 'role_id',
+});
+
+Permissions.belongsToMany(Roles, {
+  through: 'role_permission',
+});
+
+Roles.belongsToMany(Permissions, {
+  through: 'role_permission',
+});
 
 export function getUserModel(type: string) {
   return type === 'teacher' ? Teachers : Students;

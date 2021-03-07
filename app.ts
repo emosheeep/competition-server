@@ -1,5 +1,6 @@
-import express, { Response, Request, NextFunction } from 'express';
 import 'express-async-errors';
+import express, { Response, Request, NextFunction } from 'express';
+import { ValidationError } from 'sequelize';
 import consola from 'consola';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
@@ -18,19 +19,25 @@ app.use('/api', Router);
 
 // @ts-ignore 错误处理
 app.use((e, req: Request, res: Response, next: NextFunction) => {
-  res.json({
-    code: 500,
-    msg: e.message,
-  });
+  if (e instanceof ValidationError) {
+    res.json({
+      code: 400,
+      msg: e.errors.map(item => item.message).join('--'),
+    });
+  } else {
+    res.json({
+      code: 500,
+      msg: e.message,
+    });
+  }
   next(e);
 });
 
-app.listen(3000, function() {
-  sequelize.sync({ alter: true }).then(() => {
-    consola.ready({
-      message: `Server is listening on http://localhost:${3000}`,
-      badge: true,
-    });
+app.listen(3000, async function() {
+  await sequelize.sync();
+  consola.ready({
+    message: `Server is listening on http://localhost:${3000}`,
+    badge: true,
   });
 });
 
