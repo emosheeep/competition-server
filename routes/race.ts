@@ -23,8 +23,8 @@ router.get('/race/list', async (req: Request, res: Response) => {
 
   const { rows, count } = await Races.findAndCountAll({
     where: query,
-    limit: toNumber(limit),
-    offset: toNumber(offset) - 1,
+    limit: toNumber(limit) || undefined,
+    offset: toNumber(offset) - 1 || undefined,
   });
   res.json({
     code: 200,

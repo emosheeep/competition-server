@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { toNumber } from 'lodash';
-import { likeQuery, Permissions } from '../db/model';
+import { likeQuery, Permissions, sequelize } from '../db/model';
 
 const router = Router();
 
@@ -16,8 +16,8 @@ router.get('/permission/list', async (req: Request, res: Response) => {
 
   const { rows, count } = await Permissions.findAndCountAll({
     where: query,
-    limit: toNumber(limit),
-    offset: toNumber(offset) - 1,
+    limit: toNumber(limit) || undefined,
+    offset: toNumber(offset) - 1 || undefined,
   });
   res.json({
     code: 200,
@@ -50,7 +50,18 @@ router.delete('/permission/delete', async (req: Request, res: Response) => {
       msg: '参数有误',
     });
   }
-  await Permissions.destroy({ where: { id: data } });
+  await sequelize.transaction(async transaction => {
+    for (const id of data) {
+      const permission = await Permissions.findByPk(id);
+      // @ts-ignore
+      const num = await permission.countRoles();
+      if (num === 0) {
+        await Permissions.destroy({ where: { id: data }, transaction });
+      } else {
+        throw new Error(`id为${id}的权限被${num}个角色引用，不能删除`);
+      }
+    }
+  });
   res.json({
     code: 200,
     msg: '删除成功',

@@ -115,36 +115,16 @@ export const Permissions = sequelize.define('permission', {
   },
 });
 
-export const StudentRole = sequelize.define('student_role', {
-  sid: { type: DataTypes.STRING },
-  role_id: { type: DataTypes.INTEGER },
-}, {
-  freezeTableName: true,
-});
+// 学生、教师与角色的n:1映射关系
+Roles.hasMany(Students, { foreignKey: 'role_id' });
+Students.belongsTo(Roles, { foreignKey: 'role_id' });
+Roles.hasMany(Teachers, { foreignKey: 'role_id' });
+Teachers.belongsTo(Roles, { foreignKey: 'role_id' });
 
-export const TeacherRole = sequelize.define('teacher_role', {
-  tid: { type: DataTypes.STRING },
-  role_id: { type: DataTypes.INTEGER },
-}, {
-  freezeTableName: true,
-});
-
-// 学生、教师与角色的映射关系
-Roles.belongsToMany(Students, {
-  through: StudentRole,
-  foreignKey: 'sid',
-  otherKey: 'role_id',
-});
-Roles.belongsToMany(Teachers, {
-  through: TeacherRole,
-  foreignKey: 'tid',
-  otherKey: 'role_id',
-});
-
+// 权限与角色之间的m:n多对多映射关系
 Permissions.belongsToMany(Roles, {
   through: 'role_permission',
 });
-
 Roles.belongsToMany(Permissions, {
   through: 'role_permission',
 });

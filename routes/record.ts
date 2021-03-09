@@ -18,8 +18,8 @@ router.get('/record/list', async (req: Request, res: Response) => {
   }));
   const { rows, count } = await Records.findAndCountAll({
     where: recordQuery,
-    limit: toNumber(limit),
-    offset: toNumber(offset) - 1,
+    limit: toNumber(limit) || undefined,
+    offset: toNumber(offset) - 1 || undefined,
     include: [
       { model: Students, attributes: [['name', 'sname']] },
       { model: Teachers, attributes: [['name', 'tname']] },
