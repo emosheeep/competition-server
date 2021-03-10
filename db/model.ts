@@ -16,7 +16,7 @@ export const sequelize = new Sequelize({
   dialect: 'mysql', // 数据库使用mysql
   host: '39.108.76.90', // 数据库服务器ip
   port: 3306, // 数据库服务器端口
-  // sync: { alter: true },
+  sync: { alter: true },
   define: {
     charset: 'utf8',
     underscored: true, // 字段以下划线（_）来分割（默认是驼峰命名风格）
@@ -107,8 +107,12 @@ export const Roles = sequelize.define('role', {
 
 export const Permissions = sequelize.define('permission', {
   label: { type: DataTypes.STRING, allowNull: false, unique: true },
+  actions: { type: DataTypes.JSON, allowNull: false },
   description: { type: DataTypes.STRING },
-  actions: { type: DataTypes.JSON },
+  type: {
+    type: DataTypes.ENUM('user', 'role', 'race', 'record', 'permission'),
+    allowNull: false,
+  },
 }, {
   setterMethods: {
     ...trim(['label', 'description']),

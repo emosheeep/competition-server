@@ -47,6 +47,15 @@ router.delete('/user/delete', async (req: Request, res: Response) => {
   if (!Array.isArray(data.ids)) {
     return res400(res);
   }
+  if (
+    data.ids.includes(get(req, 'user.account')) &&
+    type === get(req, 'user.identity')
+  ) {
+    return res.json({
+      code: 403,
+      msg: '不能删除自己',
+    });
+  }
   const UserModal = getUserModel(type);
   await UserModal.destroy({
     where: { [UserModal.primaryKeyAttribute]: data.ids },
