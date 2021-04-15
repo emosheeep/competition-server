@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { set } from 'lodash';
 import { verify } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import secretKey from '../config/tokenKey';
+import { tokenKey } from '../config/config';
 import { getUserModel, Roles } from '../db/model';
 
 export default function(req: Request, res: Response, next: NextFunction) {
@@ -13,7 +13,7 @@ export default function(req: Request, res: Response, next: NextFunction) {
       msg: '拒绝访问',
     });
   }
-  verify(token, secretKey, async function(err, payload: any) {
+  verify(token, tokenKey, async function(err, payload: any) {
     if (err) {
       return res.json({
         code: 403,

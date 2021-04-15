@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import { compareSync } from 'bcryptjs';
 import { getUserModel } from '../db/model';
 import { sign } from 'jsonwebtoken';
-import secretKey from '../config/tokenKey';
+import { tokenKey } from '../config/config';
 import dayjs from 'dayjs';
 
 const router = Router();
@@ -35,7 +35,7 @@ router.post('/login', async (req: Request, res: Response) => {
     account,
     identity,
     exp: exp.valueOf(),
-  }, secretKey), {
+  }, tokenKey), {
     expires: exp.toDate(),
   });
   res.json({

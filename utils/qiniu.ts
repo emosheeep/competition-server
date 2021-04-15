@@ -1,5 +1,5 @@
 import qiniu from 'qiniu';
-import { bucket, accessKey, secretKey, domain } from '../config/qiniu';
+import { bucket, accessKey, secretKey, domain } from '../config/config';
 
 // 鉴权对象
 const mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
