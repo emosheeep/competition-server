@@ -2,8 +2,8 @@ import { get } from 'lodash';
 import { Request, Response, NextFunction } from 'express';
 
 const strategy = {
-  '/user/add': gen('user', 'add'),
-  '/user/delete': gen('user', 'delete'),
+  // '/user/add': gen('user', 'add'),
+  // '/user/delete': gen('user', 'delete'),
   '/user/list': gen('user', 'query'),
   '/user/update': gen('user', 'update'),
   '/race/add': gen('race', 'add'),
@@ -16,7 +16,7 @@ const strategy = {
   '/record/update': gen('record', 'update'),
 };
 
-export default function(req: Request, res: Response, next: NextFunction) {
+export default function (req: Request, res: Response, next: NextFunction) {
   const checker = strategy[req.path];
   if (checker) {
     const permissions = get(req, 'user.permissions', []);
@@ -32,7 +32,7 @@ export default function(req: Request, res: Response, next: NextFunction) {
 }
 
 function gen(type, action) {
-  return function(permissions) {
+  return function (permissions) {
     return permissions.some(p => p.type === type && p.actions.includes(action));
   };
 }

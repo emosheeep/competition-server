@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { getUserModel, likeQuery } from '../db/model';
+import { getUserModel, likeQuery, sequelize } from '../db/model';
 import { compact, differenceBy, get, omit, toNumber } from 'lodash';
 import { compareSync } from 'bcryptjs';
 
@@ -26,7 +26,7 @@ router.post('/user/add', async (req: Request, res: Response) => {
   if (!type || !data) {
     return res400(res);
   }
-  const [exists, unexists] = await checkUser(type, Array.isArray(data) ? data : [data]);
+  const [exists] = await checkUser(type, [data]);
   if (exists.length !== 0) {
     return res.json({
       code: 1,
@@ -35,12 +35,37 @@ router.post('/user/add', async (req: Request, res: Response) => {
     });
   }
   const UserModel = getUserModel(type);
-  await UserModel.bulkCreate(unexists);
+  await UserModel.create(data);
   res.json({
     code: 200,
     msg: '添加成功',
   });
 });
+
+router.post('/user/import', async (req: Request, res: Response) => {
+  const { type, data = [] } = req.body;
+  if (!type || !data.length) {
+    return res400(res);
+  }
+  const [exists, unexists] = await checkUser(type, data);
+  if (exists.length !== 0) {
+    return res.json({
+      code: 1,
+      msg: '用户已存在',
+      data: exists,
+    });
+  }
+  const UserModel = getUserModel(type);
+
+  await sequelize.transaction(async t => {
+    await UserModel.bulkCreate(unexists, { transaction: t });
+  })
+
+  res.json({
+    code: 200,
+    msg: '添加成功',
+  });
+})
 
 router.delete('/user/delete', async (req: Request, res: Response) => {
   const { type, data } = req.body;

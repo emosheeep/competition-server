@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 import { tokenKey } from '../config/config';
 import { getUserModel, Roles } from '../db/model';
 
-export default function(req: Request, res: Response, next: NextFunction) {
+export default function (req: Request, res: Response, next: NextFunction) {
   const token = req.cookies.uid;
   if (typeof token !== 'string') {
     return res.json({
@@ -13,7 +13,7 @@ export default function(req: Request, res: Response, next: NextFunction) {
       msg: '拒绝访问',
     });
   }
-  verify(token, tokenKey, async function(err, payload: any) {
+  verify(token, tokenKey, async function (err, payload: any) {
     if (err) {
       return res.json({
         code: 403,
@@ -23,8 +23,8 @@ export default function(req: Request, res: Response, next: NextFunction) {
     const { exp, identity, account } = payload;
     if (dayjs().isAfter(exp)) {
       return res.json({
-        code: 401,
-        msg: 'Unauthorized',
+        code: 403,
+        msg: '请重新登陆',
       });
     }
     const user = await getUserModel(identity).findByPk(account);

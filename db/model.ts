@@ -35,7 +35,7 @@ export const sequelize = new Sequelize({
 export const Students = sequelize.define('student', {
   sid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false },
+  password: { type: DataTypes.STRING, allowNull: false, defaultValue: '123456' },
   sex: { type: DataTypes.INTEGER, allowNull: false }, // 0 女, 1 男
   grade: { type: DataTypes.INTEGER, allowNull: false },
   class: { type: DataTypes.STRING, allowNull: false },
@@ -50,9 +50,9 @@ export const Students = sequelize.define('student', {
 export const Teachers = sequelize.define('teacher', {
   tid: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false, set: setPassword },
-  rank: { type: DataTypes.INTEGER, allowNull: false }, // 职称
-  description: { type: DataTypes.STRING, allowNull: false },
+  password: { type: DataTypes.STRING, allowNull: false, defaultValue: '123456' },
+  rank: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }, // 职称 0: 其他
+  description: { type: DataTypes.STRING },
 }, {
   timestamps: true,
   setterMethods: {
@@ -69,7 +69,7 @@ export const Races = sequelize.define('race', {
   level: { type: DataTypes.INTEGER, allowNull: false },
   location: { type: DataTypes.STRING, allowNull: false },
   date: { type: DataTypes.DATE, allowNull: false },
-  description: { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.STRING },
 }, {
   timestamps: true,
   setterMethods: {
