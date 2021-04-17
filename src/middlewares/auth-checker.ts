@@ -1,27 +1,24 @@
-import { get } from 'lodash';
 import { Request, Response, NextFunction } from 'express';
 
 const strategy = {
-  // '/user/add': gen('user:add'),
-  // '/user/delete': gen('user:delete'),
-  // '/user/list': gen('user:query'),
-  // '/user/update': gen('user:update'),
-  // '/race/add': gen('race:add'),
-  // '/race/delete': gen('race:delete'),
-  // '/race/list': gen('race:query'),
-  // '/race/update': gen('race:update'),
-  // '/record/add': gen('record:add'),
-  // '/record/delete': gen('record:delete'),
-  // '/record/list': gen('record:query'),
-  // '/record/update': gen('record:update'),
+  '/user/add': check('user:add'),
+  '/user/delete': check('user:delete'),
+  '/user/list': check('user:query'),
+  '/user/update': check('user:update'),
+  '/race/add': check('race:add'),
+  '/race/delete': check('race:delete'),
+  '/race/list': check('race:query'),
+  '/race/update': check('race:update'),
+  '/record/add': check('record:add'),
+  '/record/delete': check('record:delete'),
+  '/record/list': check('record:query'),
+  '/record/update': check('record:update'),
 };
 
 export default function(req: Request, res: Response, next: NextFunction) {
   const checker = strategy[req.path];
   if (!checker) return next();
-  const permissions = get(req, 'user.permissions', []);
-  console.log(permissions);
-
+  const permissions = req.user.permissions;
   if (checker(permissions)) {
     return next();
   }
@@ -36,8 +33,8 @@ export default function(req: Request, res: Response, next: NextFunction) {
  * @param {string} type 权限类别
  * @returns
  */
-function gen(type: string) {
+function check(type: string) {
   return function(permissions) {
-    return permissions.some(p => p.type === type);
+    return permissions.some(v => v === type);
   };
 }

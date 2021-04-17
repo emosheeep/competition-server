@@ -21,7 +21,7 @@ router.get('/role/list', async (req: Request, res: Response) => {
     include: {
       model: Permissions,
       attributes: {
-        include: ['actions', 'id', 'label'],
+        include: ['action', 'id', 'label'],
       },
     },
   });

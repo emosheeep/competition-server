@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { set } from 'lodash';
 import { verify } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { tokenKey } from '../config/config';
@@ -34,12 +33,15 @@ export default function(req: Request, res: Response, next: NextFunction) {
     const permissions = (await role?.getPermissions()) || [];
 
     // 将user挂载到请求对象上
-    set(req, 'user', {
+    req.user = {
       account,
       identity,
-      permissions: permissions.map(item => item.toJSON()),
-    });
+      role,
+      permissions: permissions.reduce((res, v) => {
+        // 拼接成"user:add"这样的字符串
+        return res.concat(`${v.type}:${v.action}`);
+      }, []),
+    };
     next();
-    console.log(req.user);
   });
 }

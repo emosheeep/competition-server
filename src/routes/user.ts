@@ -6,7 +6,7 @@ import { compareSync } from 'bcryptjs';
 const router = Router();
 
 router.get('/get_user', async (req: Request, res: Response) => {
-  const { identity, account } = get(req, 'user') ?? {};
+  const { identity, account } = req.user ?? {};
   const UserModel = getUserModel(identity);
   const user = await UserModel.findByPk(account, {
     attributes: { exclude: ['password', 'create_time', 'update_time'] },
@@ -14,10 +14,7 @@ router.get('/get_user', async (req: Request, res: Response) => {
   res.json({
     code: 200,
     msg: 'success',
-    data: Object.assign({}, user?.toJSON(), {
-      account,
-      identity,
-    }),
+    data: Object.assign({}, user?.toJSON(), req.user),
   });
 });
 

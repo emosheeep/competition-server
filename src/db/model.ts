@@ -107,11 +107,14 @@ export const Roles = sequelize.define('role', {
 
 export const Permissions = sequelize.define('permission', {
   label: { type: DataTypes.STRING, allowNull: false, unique: true },
-  actions: { type: DataTypes.JSON, allowNull: false },
   description: { type: DataTypes.STRING },
-  type: {
-    type: DataTypes.ENUM('user', 'role', 'race', 'record', 'permission'),
+  action: {
     allowNull: false,
+    type: DataTypes.ENUM('add', 'delete', 'update', 'query', 'import', 'export'),
+  },
+  type: {
+    allowNull: false,
+    type: DataTypes.ENUM('user', 'role', 'race', 'record', 'permission'),
   },
 }, {
   setterMethods: {

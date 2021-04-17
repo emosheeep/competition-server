@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { toNumber } from 'lodash';
+import { toNumber, pick } from 'lodash';
 import { likeQuery, Permissions, sequelize } from '../db/model';
 
 const router = Router();
@@ -33,6 +33,13 @@ router.post('/permission/add', async (req: Request, res: Response) => {
     return res.json({
       code: 400,
       msg: '参数有误',
+    });
+  }
+  const isExist = await Permissions.findOne({ where: pick(data, ['action', 'type']) });
+  if (isExist) {
+    return res.json({
+      code: 400,
+      msg: '权限已存在',
     });
   }
   await Permissions.create(data);
