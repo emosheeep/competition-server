@@ -59,13 +59,13 @@ router.post('/user/import', async (req: Request, res: Response) => {
 
   await sequelize.transaction(async t => {
     await UserModel.bulkCreate(unexists, { transaction: t });
-  })
+  });
 
   res.json({
     code: 200,
     msg: '添加成功',
   });
-})
+});
 
 router.delete('/user/delete', async (req: Request, res: Response) => {
   const { type, data } = req.body;

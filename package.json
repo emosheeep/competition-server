@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "竞赛管理系统服务端",
   "scripts": {
-    "dev": "nodemon -e ts --exec ts-node app.ts",
-    "start": "ts-node app.ts",
+    "dev": "ts-node-dev src/app.ts",
+    "start": "ts-node src/app.ts",
     "lint": "eslint --fix --ext .ts"
   },
   "keywords": [],
@@ -12,7 +12,6 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "body-parser": "^1.19.0",
     "consola": "^2.15.3",
     "cookie-parser": "^1.4.5",
     "dayjs": "^1.10.4",
@@ -39,8 +38,8 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-standard": "^4.1.0",
-    "nodemon": "^2.0.7",
     "ts-node": "^9.1.1",
+    "ts-node-dev": "^1.1.6",
     "tsc": "^1.20150623.0",
     "typescript": "^4.2.4"
   }

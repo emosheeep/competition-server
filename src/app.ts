@@ -1,8 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="index.d.ts" />
 import 'express-async-errors';
-import express, { Response, Request, NextFunction } from 'express';
+import express, { Response, Request, NextFunction, json, urlencoded } from 'express';
 import { ValidationError } from 'sequelize';
 import consola from 'consola';
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import Router from './routes';
 import { sequelize } from './db/model';
@@ -11,8 +12,8 @@ const app = express();
 
 // 中间件
 app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(json());
+app.use(urlencoded({ extended: true }));
 
 // 路由
 app.use('/api', Router);
