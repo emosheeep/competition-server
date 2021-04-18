@@ -4,6 +4,7 @@ import 'express-async-errors';
 import express, { Response, Request, NextFunction, json, urlencoded } from 'express';
 import { ValidationError } from 'sequelize';
 import consola from 'consola';
+import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import Router from './routes';
 import { sequelize } from './db/model';
@@ -11,6 +12,7 @@ import { sequelize } from './db/model';
 const app = express();
 
 // 中间件
+app.use(morgan('tiny')); // 请求日志
 app.use(cookieParser());
 app.use(json());
 app.use(urlencoded({ extended: true }));
@@ -44,9 +46,9 @@ app.listen(3000, async function() {
 
 // 捕获可能遗漏的错误，防止程序崩溃
 process.on('uncaughtException', function(e) {
-  consola.log(e);
+  consola.error(e);
 });
 
 process.on('unhandledRejection', function(e) {
-  consola.log(e);
+  consola.error(e);
 });

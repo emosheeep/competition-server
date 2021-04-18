@@ -17,6 +17,7 @@ export const sequelize = new Sequelize({
   host: '39.108.76.90', // 数据库服务器ip
   port: 3306, // 数据库服务器端口
   sync: { alter: true },
+  logging: false,
   define: {
     charset: 'utf8',
     underscored: true, // 字段以下划线（_）来分割（默认是驼峰命名风格）
