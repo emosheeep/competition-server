@@ -28,6 +28,7 @@ module.exports = {
     '@typescript-eslint/ban-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     'comma-dangle': ['error', 'always-multiline'], // 末尾逗号
+    '@typescript-eslint/triple-slash-reference': 'off',
     'space-before-function-paren': ['error', {
       anonymous: 'never',
       named: 'never',

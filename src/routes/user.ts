@@ -108,8 +108,8 @@ router.get('/user/list', async (req: Request, res: Response) => {
     attributes: { exclude: ['password'] },
     where: query,
     order: [['create_time', 'DESC']],
-    offset: toNumber(offset) - 1,
-    limit: toNumber(limit),
+    limit: toNumber(limit) || undefined,
+    offset: toNumber(limit) * (toNumber(offset) - 1) || undefined,
   });
   res.json({
     code: 200,

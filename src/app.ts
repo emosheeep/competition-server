@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="index.d.ts" />
 import 'express-async-errors';
 import express, { Response, Request, NextFunction, json, urlencoded } from 'express';
@@ -7,7 +6,6 @@ import consola from 'consola';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import Router from './routes';
-import { sequelize } from './db/model';
 
 const app = express();
 
@@ -36,8 +34,7 @@ app.use((e, req: Request, res: Response, next: NextFunction) => {
   next(e);
 });
 
-app.listen(3000, async function() {
-  await sequelize.sync();
+app.listen(3000, function() {
   consola.ready({
     message: `Server is listening on http://localhost:${3000}`,
     badge: true,

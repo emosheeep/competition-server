@@ -9,15 +9,14 @@ router.get('/permission/list', async (req: Request, res: Response) => {
     limit,
     offset,
     label,
-    description,
     ...query
   } = req.query;
-  Object.assign(query, likeQuery({ label, description }));
+  Object.assign(query, likeQuery({ label }));
 
   const { rows, count } = await Permissions.findAndCountAll({
     where: query,
     limit: toNumber(limit) || undefined,
-    offset: toNumber(offset) - 1 || undefined,
+    offset: toNumber(limit) * (toNumber(offset) - 1) || undefined,
   });
   res.json({
     code: 200,
@@ -82,6 +81,13 @@ router.post('/permission/update', async (req: Request, res: Response) => {
     return res.json({
       code: 400,
       msg: '参数有误',
+    });
+  }
+  const isExist = await Permissions.findOne({ where: pick(otherData, ['action', 'type']) });
+  if (isExist) {
+    return res.json({
+      code: 400,
+      msg: '权限已存在',
     });
   }
   await Permissions.update(otherData, { where: { id } });

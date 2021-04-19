@@ -17,7 +17,8 @@ router.get('/role/list', async (req: Request, res: Response) => {
   const { rows, count } = await Roles.findAndCountAll({
     where: query,
     limit: toNumber(limit) || undefined,
-    offset: toNumber(offset) - 1 || undefined,
+    offset: toNumber(limit) * (toNumber(offset) - 1) || undefined,
+    distinct: true, // 防止重复计数
     include: {
       model: Permissions,
       attributes: {
