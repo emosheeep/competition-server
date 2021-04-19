@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { toNumber } from 'lodash';
-import { likeQuery, Roles, Permissions, sequelize } from '../db/model';
+import { likeQuery, Roles, Permissions, sequelize } from '@/db/model';
 
 const router = Router();
 

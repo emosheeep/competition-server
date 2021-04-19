@@ -1,11 +1,12 @@
 /// <reference path="index.d.ts" />
+import 'module-alias/register';
 import 'express-async-errors';
 import express, { Response, Request, NextFunction, json, urlencoded } from 'express';
 import { ValidationError } from 'sequelize';
 import consola from 'consola';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import Router from './routes';
+import Router from '@/routes';
 
 const app = express();
 

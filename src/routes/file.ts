@@ -4,7 +4,7 @@ import {
   getToken,
   refreshUrl,
   getFileInfo,
-} from '../utils/qiniu';
+} from '@/utils/qiniu';
 
 const router = Router();
 

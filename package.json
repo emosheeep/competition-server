@@ -39,10 +39,14 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-standard": "^4.1.0",
+    "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
     "ts-node": "^9.1.1",
     "ts-node-dev": "^1.1.6",
     "tsc": "^1.20150623.0",
     "typescript": "^4.2.4"
+  },
+  "_moduleAliases": {
+    "@": "src"
   }
 }

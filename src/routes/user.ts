@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { getUserModel, likeQuery, sequelize } from '../db/model';
+import { getUserModel, likeQuery, sequelize } from '@/db/model';
 import { compact, differenceBy, get, omit, toNumber } from 'lodash';
 import { compareSync } from 'bcryptjs';
 

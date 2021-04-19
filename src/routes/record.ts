@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { Request, Response, Router } from 'express';
-import { Records, Races, Students, Teachers, likeQuery } from '../db/model';
+import { Records, Races, Students, Teachers, likeQuery } from '@/db/model';
 import { toNumber } from 'lodash';
 import File from './file';
 
