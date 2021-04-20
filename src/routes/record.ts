@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import { Request, Response, Router } from 'express';
 import { Records, Races, Students, Teachers, likeQuery } from '@/db/model';
-import { toNumber } from 'lodash';
+import { pick, toNumber } from 'lodash';
+import { check } from '@/middlewares/auth-check';
 import File from './file';
 
 const router = Router();
@@ -63,12 +64,42 @@ router.post('/record/add', async (req: Request, res: Response) => {
   });
 });
 
+const checkRecordUpdate = check('record:update');
 router.patch('/record/update', async (req: Request, res: Response) => {
   const { record_id, ...data } = req.body;
-  await Records.update(data, { where: { record_id } });
+  const update = async data => await Records.update(data, { where: { record_id } });
+  const record = await Records.findByPk(record_id);
+  // @ts-ignore 学生自己
+  const student = await record.getStudent();
+
+  if (!record || !student) {
+    return res.json({ code: 404, msg: '记录不存在' });
+  }
+
+  let isUpdateSuccess = false;
+  // 有权限直接修改
+  if (checkRecordUpdate(req)) {
+    await update(data);
+    isUpdateSuccess = true;
+  }
+  // 判断是否是学生本人，是自己可以改，但只能改分数
+  if (
+    student.getDataValue('sid') === req.user.account &&
+    req.user.identity === 'student'
+  ) {
+    await update(pick(data, ['score']));
+    isUpdateSuccess = true;
+  }
+
+  if (isUpdateSuccess) {
+    return res.json({
+      code: 200,
+      msg: '修改成功',
+    });
+  }
   res.json({
-    code: 200,
-    msg: '修改成功',
+    code: 401,
+    msg: '暂无权限',
   });
 });
 

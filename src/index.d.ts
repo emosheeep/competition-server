@@ -3,6 +3,8 @@ declare namespace Express {
     user: {
       permissions: any[],
       role: any,
+      account: string,
+      identity: 'student' | 'teacher'
       [key: string]: any;
     }
   }

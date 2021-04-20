@@ -2,11 +2,12 @@ import { Request, Response, Router } from 'express';
 import { getUserModel, likeQuery, sequelize } from '@/db/model';
 import { compact, differenceBy, get, omit, toNumber } from 'lodash';
 import { compareSync } from 'bcryptjs';
+import { check } from '@/middlewares/auth-check';
 
 const router = Router();
 
 router.get('/get_user', async (req: Request, res: Response) => {
-  const { identity, account } = req.user ?? {};
+  const { identity, account } = req.user;
   const UserModel = getUserModel(identity);
   const user = await UserModel.findByPk(account, {
     attributes: { exclude: ['password', 'create_time', 'update_time'] },
@@ -69,10 +70,8 @@ router.delete('/user/delete', async (req: Request, res: Response) => {
   if (!Array.isArray(data.ids)) {
     return res400(res);
   }
-  if (
-    data.ids.includes(get(req, 'user.account')) &&
-    type === get(req, 'user.identity')
-  ) {
+  const { account, identity } = req.user;
+  if (data.ids.includes(account) && type === identity) {
     return res.json({
       code: 403,
       msg: '不能删除自己',
@@ -164,17 +163,27 @@ router.put('/user/reset', async (req: Request, res: Response) => {
   });
 });
 
+const checkUserUpdate = check('user:update');
 router.put('/user/update', async (req: Request, res: Response) => {
   const { type, data } = req.body;
   if (!type || !data) {
     return res400(res);
   }
+
   const UserModel = getUserModel(type);
   const key = UserModel.primaryKeyAttribute;
   const { [key]: account, ...otherAttrs } = data;
-  await UserModel.update(otherAttrs, {
-    where: { [key]: account },
-  });
+  delete otherAttrs.password; // 密码修改使用单独的接口
+
+  const isSelf = account === req.user.account && req.user.identity === type;
+  const isPass = isSelf || checkUserUpdate(req);
+  if (!isPass) {
+    return res.json({
+      code: 401,
+      msg: '暂无权限',
+    });
+  }
+  await UserModel.update(otherAttrs, { where: { [key]: account } });
   res.json({
     code: 200,
     msg: '修改成功',

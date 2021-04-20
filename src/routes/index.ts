@@ -5,8 +5,8 @@ import Record from './record';
 import Auth from './auth';
 import Permission from './permission';
 import Role from './role';
-import loginChecker from '@/middlewares/login';
-import authChecker from '@/middlewares/auth';
+import loginChecker from '@/middlewares/login-check';
+import authChecker from '@/middlewares/auth-check';
 
 const router = Router();
 
