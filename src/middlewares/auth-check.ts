@@ -37,6 +37,7 @@ const strategy: Checkers = {
   '/role/add': check('role:add'),
   '/role/delete': check('role:delete'),
   '/role/update': check('role:update'),
+  '/role/grant': check('role:update'),
 };
 
 /**

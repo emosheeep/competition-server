@@ -1,6 +1,12 @@
 import { Request, Response, Router } from 'express';
 import { toNumber } from 'lodash';
-import { likeQuery, Roles, Permissions, sequelize } from '@/db/model';
+import {
+  likeQuery,
+  getUserModel,
+  Roles,
+  Permissions,
+  sequelize,
+} from '@/db/model';
 
 const router = Router();
 
@@ -115,6 +121,28 @@ router.post('/role/update', async (req: Request, res: Response) => {
   res.json({
     code: 200,
     msg: '修改成功',
+  });
+});
+
+router.post('/role/grant', async (req: Request, res: Response) => {
+  const { type, account, role_id } = req.body;
+  if (!type || !account || !role_id) {
+    return res.json({
+      code: 400,
+      msg: '参数有误',
+    });
+  }
+  const UserModal = getUserModel(type);
+  const data = await UserModal.update({ role_id }, {
+    where: {
+      [UserModal.primaryKeyAttribute]: account,
+    },
+  });
+  console.log(data);
+
+  res.json({
+    code: 200,
+    msg: '操作成功',
   });
 });
 

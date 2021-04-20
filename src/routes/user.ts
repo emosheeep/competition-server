@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { getUserModel, likeQuery, sequelize } from '@/db/model';
-import { compact, differenceBy, get, omit, toNumber } from 'lodash';
+import { compact, differenceBy, get, omit, set, toNumber } from 'lodash';
 import { compareSync } from 'bcryptjs';
 import { check } from '@/middlewares/auth-check';
 
@@ -73,7 +73,7 @@ router.delete('/user/delete', async (req: Request, res: Response) => {
   const { account, identity } = req.user;
   if (data.ids.includes(account) && type === identity) {
     return res.json({
-      code: 403,
+      code: 400,
       msg: '不能删除自己',
     });
   }
@@ -204,7 +204,7 @@ function res400(res: Response) {
  * @param type 用户类型
  * @param users 用户数据
  */
-function checkUser(type: string, users: any[]) {
+function checkUser(type: 'student' | 'teacher', users: any[]) {
   return new Promise<Array<Array<object>>>((resolve, reject) => {
     const model = getUserModel(type);
     const key = model.primaryKeyAttribute;
@@ -220,6 +220,8 @@ function checkUser(type: string, users: any[]) {
           return get(a, key) === get(b, key);
         });
       }
+      // 设置默认身份 role_id为3是学生、4是教师
+      notExist.forEach(v => set(v, 'role_id', type === 'student' ? 3 : 4));
       resolve([exist, notExist]);
     }).catch(reject);
   });
