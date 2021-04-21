@@ -6,6 +6,7 @@ import { ValidationError } from 'sequelize';
 import consola from 'consola';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import RateLimit from 'express-rate-limit';
 import Router from '@/routes';
 
 const app = express();
@@ -15,6 +16,16 @@ app.use(morgan('tiny')); // 请求日志
 app.use(cookieParser());
 app.use(json());
 app.use(urlencoded({ extended: true }));
+app.use(RateLimit({
+  windowMs: 1000,
+  max: 5,
+  handler(req, res) {
+    res.json({
+      code: 429,
+      msg: '请求太频繁，歇会吧~',
+    });
+  },
+}));
 
 // 路由
 app.use('/api', Router);
