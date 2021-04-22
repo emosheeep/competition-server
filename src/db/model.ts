@@ -1,3 +1,6 @@
+import dayjs from 'dayjs';
+import { genSaltSync, hashSync } from 'bcryptjs';
+import { DataBaseConfig } from '@/config/config';
 import {
   Sequelize,
   DataTypes,
@@ -6,16 +9,9 @@ import {
   ModelGetterOptions,
   Op,
 } from 'sequelize';
-import { genSaltSync, hashSync } from 'bcryptjs';
-import dayjs from 'dayjs';
 
 export const sequelize = new Sequelize({
-  database: 'competition', // 数据库名
-  username: 'root', // 用户名
-  password: '15591453874', // 用户密码
-  dialect: 'mysql', // 数据库使用mysql
-  host: '39.108.76.90', // 数据库服务器ip
-  port: 3306, // 数据库服务器端口
+  ...DataBaseConfig,
   logging: false,
   define: {
     charset: 'utf8',

@@ -3,11 +3,8 @@ import { Request, Response, Router } from 'express';
 import { Records, Races, Students, Teachers, likeQuery } from '@/db/model';
 import { pick, toNumber } from 'lodash';
 import { check } from '@/middlewares/auth-check';
-import File from './file';
 
 const router = Router();
-
-router.use(File);
 
 router.get('/record/list', async (req: Request, res: Response) => {
   const { limit, offset, tname, sname, title, score, ...recordQuery } = req.query;
