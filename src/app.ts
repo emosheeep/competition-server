@@ -3,6 +3,7 @@ import 'module-alias/register';
 import 'express-async-errors';
 import express, { Response, Request, NextFunction, json, urlencoded } from 'express';
 import { ValidationError } from 'sequelize';
+import { cookieKey } from '@/config/config';
 import consola from 'consola';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
@@ -13,7 +14,7 @@ const app = express();
 
 // 中间件
 app.use(morgan('tiny')); // 请求日志
-app.use(cookieParser());
+app.use(cookieParser(cookieKey));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(RateLimit({

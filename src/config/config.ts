@@ -1,6 +1,7 @@
 import { Options } from 'sequelize';
 
-export const tokenKey = 'ncu_university_competition_server';
+export const tokenKey = 'token-ncu_university-competition_server';
+export const cookieKey = 'cookie-ncu_university-competition_server';
 
 export const DataBaseConfig: Options = {
   database: 'competition', // 数据库名

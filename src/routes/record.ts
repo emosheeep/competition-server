@@ -78,9 +78,8 @@ router.patch('/record/update', async (req: Request, res: Response) => {
   if (checkRecordUpdate(req)) {
     await update(data);
     isUpdateSuccess = true;
-  }
-  // 判断是否是学生本人，是自己可以改，但只能改分数
-  if (
+  } else if (
+    // 判断是否是学生，学生可以改自己的录入成绩
     student.getDataValue('sid') === req.user.account &&
     req.user.identity === 'student'
   ) {

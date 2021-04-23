@@ -5,7 +5,7 @@ import { tokenKey } from '../config/config';
 import { getUserModel, Roles } from '../db/model';
 
 export default function(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies.uid;
+  const token = req.signedCookies.uid;
   if (typeof token !== 'string') {
     return res.json({
       code: 403,

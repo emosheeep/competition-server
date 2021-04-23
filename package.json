@@ -22,7 +22,8 @@
     "lodash": "^4.17.21",
     "mysql2": "^2.2.5",
     "qiniu": "^7.3.2",
-    "sequelize": "^6.6.2"
+    "sequelize": "^6.6.2",
+    "svg-captcha": "^1.4.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
