@@ -11,13 +11,13 @@ const router = Router();
 router.post('/auth/login', async (req: Request, res: Response) => {
   const sysCode: string = req.signedCookies.code;
   const { account, password, identity, code } = req.body;
-  if (!account || !password || !identity || !code || !sysCode) {
+  if (!account || !password || !identity || !code) {
     return res.json({
       code: 400,
       msg: '参数错误',
     });
   }
-  if (code.toLowerCase() !== sysCode.toLowerCase()) {
+  if (!sysCode || code.toLowerCase() !== sysCode.toLowerCase()) {
     return res.json({
       code: 3,
       msg: '验证码有误',

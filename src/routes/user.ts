@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { getUserModel, likeQuery, sequelize } from '@/db/model';
-import { compact, differenceBy, get, omit, set, toNumber } from 'lodash';
+import { compact, set, toNumber } from 'lodash';
 import { compareSync } from 'bcryptjs';
 import { check } from '@/middlewares/auth-check';
 
@@ -29,7 +29,6 @@ router.post('/user/add', async (req: Request, res: Response) => {
     return res.json({
       code: 1,
       msg: '用户已存在',
-      data: exists,
     });
   }
   const UserModel = getUserModel(type);
@@ -46,6 +45,14 @@ router.post('/user/import', async (req: Request, res: Response) => {
     return res400(res);
   }
   const [exists, unexists] = await checkUser(type, data);
+  console.log(exists, unexists);
+
+  const UserModel = getUserModel(type);
+
+  await sequelize.transaction(async transaction => {
+    await UserModel.bulkCreate(unexists, { transaction, validate: true });
+  });
+
   if (exists.length !== 0) {
     return res.json({
       code: 1,
@@ -53,11 +60,6 @@ router.post('/user/import', async (req: Request, res: Response) => {
       data: exists,
     });
   }
-  const UserModel = getUserModel(type);
-
-  await sequelize.transaction(async t => {
-    await UserModel.bulkCreate(unexists, { transaction: t });
-  });
 
   res.json({
     code: 200,
@@ -205,24 +207,28 @@ function res400(res: Response) {
  * @param users 用户数据
  */
 function checkUser(type: 'student' | 'teacher', users: any[]) {
-  return new Promise<Array<Array<object>>>((resolve, reject) => {
+  return new Promise<[Array<object>, Array<object>]>((resolve, reject) => {
     const model = getUserModel(type);
     const key = model.primaryKeyAttribute;
     model.findAll({
-      where: { [key]: users.map(item => get(item, key)) },
-    }).then((data: any[] | undefined) => {
-      let exist: object[] = [];
-      let notExist: object[] = [];
-      if (!data) notExist = [...users];
-      else {
-        exist = data.map(item => omit(item.toJSON(), 'password'));
-        notExist = differenceBy(users, exist, (a: any, b: any) => {
-          return get(a, key) === get(b, key);
-        });
-      }
-      // 设置默认身份 role_id为3是学生、4是教师
-      notExist.forEach(v => set(v, 'role_id', type === 'student' ? 3 : 4));
-      resolve([exist, notExist]);
+      where: { [key]: users.map(item => item[key]) },
+      attributes: { exclude: ['password'] },
+    }).then((exist = []) => {
+      const accounts = new Set();
+      resolve([
+        // 第一个参数是已存在的用户
+        exist.map(item => {
+          accounts.add(item.getDataValue(key));
+          return item.toJSON();
+        }),
+        // 第二个参数是不存在的、待添加的用户
+        users.filter(user => {
+          if (accounts.has(user[key])) return false;
+          // 设置默认身份 role_id为3是学生、4是教师
+          set(user, 'role_id', type === 'student' ? 3 : 4);
+          return true;
+        }),
+      ]);
     }).catch(reject);
   });
 }

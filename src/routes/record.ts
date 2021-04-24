@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { Request, Response, Router } from 'express';
 import { Records, Races, Students, Teachers, likeQuery } from '@/db/model';
 import { pick, toNumber } from 'lodash';
@@ -124,11 +123,7 @@ async function validateRecord(data : any = {}) {
   if (!race) {
     return '比赛不存在';
   }
-  const date = race.getDataValue('date');
-  if (dayjs(date).isBefore(dayjs())) {
-    // 检查比赛是否过期
-    return '比赛已过期';
-  }
+
   const student = await Students.findByPk(sid);
   if (!student) {
     return '学生信息不存在';
