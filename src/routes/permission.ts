@@ -84,10 +84,10 @@ router.post('/permission/update', async (req: Request, res: Response) => {
     });
   }
   const isExist = await Permissions.findOne({ where: pick(otherData, ['action', 'type']) });
-  if (isExist) {
+  if (!isExist) {
     return res.json({
       code: 400,
-      msg: '权限已存在',
+      msg: '权限不存在',
     });
   }
   await Permissions.update(otherData, { where: { id } });
